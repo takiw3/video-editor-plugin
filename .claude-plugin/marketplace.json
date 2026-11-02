@@ -1,0 +1,12 @@
+{
+  "name": "takigpt",
+  "owner": { "name": "Taki Wong / TakiGPT AI" },
+  "metadata": { "description": "Tools from TakiGPT AI" },
+  "plugins": [
+    {
+      "name": "video-editor",
+      "source": ".",
+      "description": "Your AI video editor. Drop in a clip, get a finished, captioned, branded video for Reels, TikTok and Shorts."
+    }
+  ]
+}

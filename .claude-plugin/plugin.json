@@ -1,0 +1,11 @@
+{
+  "name": "video-editor",
+  "version": "1.0.0",
+  "description": "Your AI video editor. Drop in a clip you filmed on your phone and get a finished, captioned, branded video for Reels, TikTok and Shorts. No editing skills needed. 225 effects, your own style, a storyboard you approve before anything renders.",
+  "author": {
+    "name": "Taki Wong / TakiGPT AI",
+    "url": "https://github.com/takiw3"
+  },
+  "license": "MIT",
+  "keywords": ["video", "reels", "tiktok", "shorts", "editing", "captions", "motion-graphics", "social-media"]
+}

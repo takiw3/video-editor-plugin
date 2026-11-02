@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "creator": {
+    "name": "",
+    "handle": "",
+    "site": ""
+  },
+  "fonts": {
+    "display": {
+      "family": "Space Grotesk",
+      "italic": false,
+      "weight": 700
+    },
+    "text": {
+      "family": "Inter",
+      "italic": false,
+      "weight": 700
+    },
+    "mono": {
+      "family": "JetBrains Mono",
+      "italic": false,
+      "weight": 500
+    },
+    "caption": {
+      "family": "Space Grotesk",
+      "italic": false,
+      "weight": 700
+    }
+  },
+  "colors": {
+    "light": "#EDEFF2",
+    "dark": "#0A0C10",
+    "ink": "#0A0C10",
+    "muted_light": "#646A73",
+    "muted_dark": "rgba(237,239,242,.58)",
+    "hair_light": "#CFD3D9",
+    "hair_dark": "rgba(237,239,242,.2)",
+    "accent": "#37E2A0",
+    "accent_on_light": "#0E8A5F",
+    "negative": "#FF5C5C",
+    "negative_on_light": "#C42B31",
+    "positive": "#37E2A0",
+    "positive_on_light": "#0E8A5F",
+    "series": [
+      "#37E2A0",
+      "#5B8CFF",
+      "#FF5C5C"
+    ],
+    "caption_box": "rgba(10,12,16,.9)",
+    "caption_ink": "#FFFFFF",
+    "caption_dim": "rgba(255,255,255,.45)",
+    "textbox_bg": "#0A0C10",
+    "textbox_ink": "#37E2A0"
+  },
+  "grounds": {
+    "grid": true,
+    "radius": 6
+  },
+  "captions": {
+    "hifi": {
+      "box": true,
+      "uppercase": false,
+      "size": 56,
+      "y": 1236
+    },
+    "lofi": {
+      "box": true,
+      "size": 66,
+      "y": 1318
+    },
+    "preset": "active-pill"
+  },
+  "grade": "contrast(1.08) saturate(.95) hue-rotate(-4deg)",
+  "motion": "normal",
+  "sound": {
+    "sfx": "normal",
+    "music": "none"
+  },
+  "end_card": false,
+  "modes": {
+    "hifi": {
+      "hook": "one-line",
+      "camera": "zooms",
+      "j_lead": 0.2
+    },
+    "lofi": {
+      "captions": "word-by-word",
+      "max_words": 3,
+      "max_chars": 20,
+      "zooms": true
+    },
+    "showcase": {
+      "emphasis_word": "slam",
+      "transitions": [
+        "whip",
+        "zoom",
+        "push"
+      ],
+      "density": "high"
+    }
+  }
+}
