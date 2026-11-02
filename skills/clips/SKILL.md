@@ -11,7 +11,8 @@ Commands run through `VE` = `~/video-editor/bin/ve`. If it doesn't exist, run th
    guest, a client): ask once whether they're OK with being in the clips.
 2. **Transcribe once.** `VE new <slug>-source <file> "<Title>" --mode lofi`, then `VE autocut <project>` transcribes the whole
    thing into `work/autocut_words.json` (it won't change anything without `--write`). Long files take a few minutes:
-   say so and run it in the background.
+   say so, and run it in the foreground with your longest timeout. If that times out, run it again: it waits for the
+   one already running.
 3. **Find the moments.** Read the transcript and pick 3 to 7 passages of about 20 to 60 seconds that hold one complete idea:
    the opening line works with no setup, it says something specific, and it ends on a point. For each give the
    timecodes, the opening line verbatim, why it stands alone, and what context it loses.

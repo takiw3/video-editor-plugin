@@ -14,8 +14,10 @@ creator (their style). This is how the edit gets made.
 They are probably not technical. Lead with what you're doing and how long it takes. Say "cut the pauses", never "J-cut",
 "KEEP" or "composition". Never paste a command, a path they don't need or a raw error. One question at a time, using a
 question tool if you have one, with your recommendation first. When you hit a decision a good editor would just make,
-make it and say so. A long step runs in the background while you tell them what's next, as long as this host wakes you when it
-finishes. If it doesn't, run it in the foreground and wait: never end your turn with a step still running.
+make it and say so. The long steps (`cutout`, `matte`, `render`) keep running on their own once started, even if your shell
+or session closes. Start one in the background, keep working, then before you end your turn run the same command again in
+the foreground with your longest timeout: it waits for the running one and prints its result. If that call times out, run it
+again. Never end a turn while one is still running: some hosts never wake you, and the next step needs its result.
 
 ## Paths
 
@@ -61,7 +63,8 @@ Then read the mode file and `<project>/style/STYLE.md`; where they disagree, the
   Set `SHOTS`, `HOLD` (studio 0.6, or 1.3 with an end card; selfie 0.04; flex 0.5), `J_LEAD` comes from the pack.
 - `VE cut <project> --plan`: every piece must read its own audio. Then `VE cut <project>` and `VE words <project>`.
 - `VE ffmpeg -y -i <project>/assets/aroll.mp4 -c copy <project>/public/clean.mp4`. If anything goes behind the head, run
-  `VE cutout <project>` in the background now (10 to 25 seconds per second of video on a laptop).
+  `VE cutout <project>` in the background now (10 to 25 seconds per second of video on a laptop), and wait for it before the
+  storyboard as above.
 
 ## 3. Write the edit (edit.py)
 
@@ -72,7 +75,8 @@ video, and every event lands on a word from `words.json`.
   entry, or a hook effect). Use their words. If the clip's opening doesn't deliver what the rest pays off, say so with
   the storyboard. Don't reorder it into a claim they didn't make.
 - **Captions**: `CAPTION_STYLE` or the pack's preset, `KIT/kit/CAPTIONS.md`. Leave `CAPS` empty for automatic word-by-word
-  captions in any mode, or write `CAPS` by hand for the studio look.
+  captions in any mode, or write `CAPS` by hand for the studio look. A full-screen beat that isn't a card (a title card, a
+  cover, an FX over the whole frame) gets a `KARAOKE` `hide` window for its length, unless it carries the words itself.
 - **Behind the head**: `BEHIND` + `CUT_WINDOWS` (never across a picture change). This is the depth that makes it look produced.
 - **Cutaways**: `BROLL` for full-screen clips or photos they sent, `OVERLAYS` on top of them, `BOXES` for labels and the CTA.
 - **Cards** (studio): `CARDS` from `KIT/cards/LIBRARY.md`, built by agents in step 4.
@@ -104,7 +108,8 @@ Skip for a selfie edit with no `FX`.
   frames into `FX` and SFX into `SOUND`.
 - **Studio cards**: one `video-editor:card-builder` per card, all at once. Each prompt gives: KIT, PROJECT, VE, the library card to
   start from, the id and folder, the exact frame count, the window, the spoken words with card times, the data, phase 1 only
-  (still and beats, no render). Review every still at full size.
+  (still and beats, no render). Review every still at full size: read it top to bottom as a viewer would. It must say the
+  line in order, say nothing twice, and the hero must fill the width. Send anything else back to the same agent.
 - No subagents: build them one at a time from the same brief.
 
 ## 5. Sound
@@ -133,10 +138,12 @@ version. When they send an asset, drop it in and clear it from `NEEDS`.
 ## 8. Render and deliver (after "go")
 
 - Card agents render their mp4s (phase 2).
-- `VE render <project> <slug>-v1` in the background: builds, renders, then checks cuts, lip sync, loudness and flashes. Plan on 3 to 10
-  minutes per minute of video, longer with a lot of effects. Look at every cut sheet it writes: no flash frame, no wrong frame, no doubled head.
+- `VE render <project> <slug>-v1`: builds, renders, then checks cuts, lip sync, loudness and flashes. Plan on 3 to 10 minutes per
+  minute of video, longer with a lot of effects. Tell them how long, then wait for it as above. Look at every cut sheet it writes: no flash frame, no wrong frame, no doubled head.
 - A pass copies the video and a phone copy next to their original clip as `<Title> v1.mp4` and `<Title> v1 (phone).mp4`.
 - A fail: fix the cause and render again. Don't deliver around a failed check, and don't tell them it passed unless it did.
+- Anything you'd list as wrong in your report (a stray caption, a clipped word, a graphic over the face), fix and render
+  again first. The report is for what needs them: a choice, an asset, a claim to check.
 - Report in plain words: where the file is, what you did, anything invented or still a placeholder, what QA couldn't check. Say
   a person should still watch it through. Offer the `post` skill for the cover, other sizes and the caption.
 - A "final" is a render that passed checks. It's approved when they say so, and they're the one who posts it.

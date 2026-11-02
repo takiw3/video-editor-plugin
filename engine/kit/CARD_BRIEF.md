@@ -34,6 +34,10 @@ Never edit KIT, the style pack, or other cards.
 ## Layout (hard)
 - Content in x 70-1010, y 250-1150. y 1170-1430 is the caption band: ground only. Nothing to read below y 1470.
 - Phone-readable: key numbers >= 96px, labels >= 30px, footnotes 24px (texture, not essential).
+- It reads in the order they say it, top to bottom and left to right: "7 BILLION / AI TOKENS", never "7 / AI TOKENS /
+  BILLION". Nothing says the same thing twice: no kicker that repeats the headline.
+- The hero (the figure or the line) spans at least 70% of the content width. The idea sits in the middle of y 250-1150,
+  not stacked at the top over empty ground.
 
 ## Motion
 - The creator's `STYLE.md` sets the pace (calm, normal or punchy). Within it:

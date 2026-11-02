@@ -143,12 +143,61 @@ class Presets(unittest.TestCase):
             self.assertTrue(S["fonts"]["display"]["family"])
             self.assertTrue(os.path.exists(os.path.join(ENG, "examples", "packs", name, "STYLE.md")))
 
+    def test_any_accent_keeps_losses_apart(self):
+        import style as ST
+        S = ST.load(os.path.join(ENG, "examples", "packs", "bold", "style.json"))
+        for accent in ("#FD5323", "#E53935", "#1D58F6", "#7E57C2", "#FFD400"):
+            C = dict(S["colors"], accent=accent, accent_on_light=presets.shade(accent, 0.72))
+            presets.fit(C)
+            self.assertGreaterEqual(ST.distance(ST.rgba(C["accent_on_light"]), ST.rgba(C["negative_on_light"])), 30, accent)
+
+    def test_style_md_follows_the_colour_and_name(self):
+        with tempfile.TemporaryDirectory() as d:
+            md = os.path.join(d, "STYLE.md")
+            shutil.copy(os.path.join(ENG, "examples", "packs", "bold", "STYLE.md"), md)
+            S = {"creator": {"name": "Sam"}, "colors": {"accent": "#FD5323"}}
+            presets.retell(md, "bold", S, {"accent": "#FFD400"})
+            presets.retell(md, None, {"colors": {"accent": "#1D58F6"}}, {"accent": "#FD5323"})
+            text = open(md).read()
+            self.assertTrue(text.startswith("# Sam's style (from the bold preset)\n\nYour accent is #1D58F6."))
+            self.assertEqual(text.count("Your accent is"), 1)
+            self.assertNotIn("#FFD400", text)
+
 
 class Post(unittest.TestCase):
     def test_srt(self):
         w = [dict(text=t, start=i * .5, end=i * .5 + .4) for i, t in enumerate("Hello there. This is a test of the captions file.".split())]
         s = postpack.srt(w)
         self.assertIn("00:00:00,000 --> 00:00:00,900\nHello there.", s)
+
+
+class LongSteps(unittest.TestCase):
+    def test_a_long_step_passes_on_its_own_result(self):
+        cli = os.path.join(ENG, "pipeline", "cli.py")
+        with tempfile.TemporaryDirectory() as d:
+            r = subprocess.run([sys.executable, cli, "cutout", d], capture_output=True, text=True, timeout=120)
+            self.assertNotEqual(r.returncode, 0)                       # no aroll.mp4: the step fails, and says so
+            self.assertIn("aroll.mp4", r.stdout)
+            self.assertNotEqual(open(os.path.join(d, "work", "ve-cutout.exit")).read().strip(), "0")
+
+
+    def test_cutout_finishes_and_then_skips(self):
+        import cutout
+        with tempfile.TemporaryDirectory() as d:
+            for sub in ("assets", "public"):
+                os.makedirs(os.path.join(d, sub))
+            subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i", "testsrc=size=64x64:rate=30", "-frames:v", "12",
+                            os.path.join(d, "assets", "aroll.mp4")], check=True)
+            fake = ["sh", "-c", "sleep 0.3; cp assets/aroll.mp4 assets/subject.webm", "remove-background"]
+            old = (cutout.HF, cutout.PROGRESS_EVERY, sys.argv)
+            try:
+                cutout.HF, cutout.PROGRESS_EVERY, sys.argv = fake, 0, ["cutout.py", d]
+                cutout.main()
+                self.assertTrue(os.path.exists(os.path.join(d, "public", "subject.webm")))
+                cutout.HF = ["false"]                                  # a second call must not run it again
+                cutout.main()
+            finally:
+                cutout.HF, cutout.PROGRESS_EVERY, sys.argv = old
 
 
 class Plugin(unittest.TestCase):

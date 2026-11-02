@@ -104,6 +104,8 @@ def lip_sync(render, E, TL, span=0.6):
         for t in sorted({cands[len(cands) // 3], cands[(2 * len(cands)) // 3]}):
             jobs.append((round(float(t), 3), p, not clear))
     res = []
+    src_end = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", E.SRC],
+                                   capture_output=True, text=True).stdout.strip().strip(",") or 0) - 1.5 / FPS
     with ThreadPoolExecutor(8) as ex:
         for t, p, covered in jobs:
             g = [k for k in keep if k["out"] - 1e-6 <= t][-1]
@@ -117,7 +119,7 @@ def lip_sync(render, E, TL, span=0.6):
             vf = f"crop={cw:.0f}:{ch:.0f}:{cx:.0f}:{cy:.0f},scale={gw}:{gh}"
             r = gray(render, t, f"scale={gw}:{gh}", gw, gh)
             r = (r - r.mean()) / r.std()
-            offs = np.arange(-span, span + 1e-6, 1 / FPS)
+            offs = np.array([d for d in np.arange(-span, span + 1e-6, 1 / FPS) if 0 <= want + d <= src_end])   # inside the clip
             frames = list(ex.map(lambda d: gray(E.SRC, want + d, vf, gw, gh), offs))
             cs = np.array([float((r * ((f - f.mean()) / f.std())).mean()) for f in frames])
             k = int(np.argmax(cs))

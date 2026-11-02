@@ -13,3 +13,5 @@ which phase to do.
 3. Use `VE hf ...` wherever the brief says `ve hf`, and `VE py <script>` for helper scripts. ffmpeg and ffprobe: `VE ffmpeg`,
    `VE ffprobe`.
 4. Do only the phase your prompt names (phase 1: still.jpg and beats, no render) and report what the brief asks for.
+5. Before you report, look at your still at full size and read it top to bottom. If it doesn't say the line in order, says
+   something twice, or the hero is smaller than the brief's layout rules allow, fix it first.

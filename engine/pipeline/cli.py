@@ -45,8 +45,75 @@ SCRIPTS = {
 }
 
 
+LONG = ("autocut", "cutout", "matte", "render")             # steps that take minutes: they outlive the session that started them
+
+
 def home():
     return os.path.expanduser(os.environ.get("VIDEO_EDITOR_HOME", "~/video-editor"))
+
+
+def alive(pid):
+    try:
+        os.kill(pid, 0)
+    except (OSError, ValueError):
+        return False
+    return True
+
+
+def run_long(cmd, rest):
+    """A long step runs in its own process group, so it keeps going when the shell or Claude session that started it
+    closes. Calling the same step again while it runs doesn't start a second one: it waits for the first and prints its
+    progress. Either way this returns the step's own exit code."""
+    import time
+    if os.name != "posix" or not rest or not os.path.isdir(os.path.expanduser(rest[0])):
+        return subprocess.call([sys.executable, os.path.join(KIT, SCRIPTS[cmd])] + rest)
+    work = os.path.join(os.path.abspath(os.path.expanduser(rest[0])), "work")
+    os.makedirs(work, exist_ok=True)
+    out, pidf, exitf = (os.path.join(work, f"ve-{cmd}.{x}") for x in ("out", "pid", "exit"))
+    script = os.path.join(KIT, SCRIPTS[cmd])
+    pid = int(open(pidf).read() or 0) if os.path.exists(pidf) else 0
+    proc = None
+    if pid and alive(pid) and not os.path.exists(exitf) and script in _command_of(pid):
+        print(f"ve: {cmd} is already running for this project, waiting for it to finish", flush=True)
+    else:
+        for f in (out, exitf):
+            if os.path.exists(f):
+                os.remove(f)
+        line = " ".join(map(_quote, [sys.executable, script] + rest))
+        proc = subprocess.Popen(["/bin/sh", "-c", f"{line} > {_quote(out)} 2>&1; echo $? > {_quote(exitf)}"],
+                                stdin=subprocess.DEVNULL, start_new_session=True)
+        pid = proc.pid
+        with open(pidf, "w") as fh:
+            fh.write(str(pid))
+    seen = 0
+    while True:
+        running = (proc.poll() is None if proc else alive(pid)) and not os.path.exists(exitf)
+        if os.path.exists(out):
+            with open(out, errors="ignore") as fh:
+                fh.seek(seen)
+                chunk = fh.read()
+            seen += len(chunk.encode())
+            if chunk:
+                print(chunk, end="", flush=True)
+        if not running:
+            break
+        time.sleep(1)
+    if proc:
+        proc.wait()
+    if not os.path.exists(exitf):
+        print(f"ve: {cmd} stopped before it finished. Run it again.", file=sys.stderr)
+        return 1
+    return int(open(exitf).read().strip() or 1)
+
+
+def _quote(s):
+    import shlex
+    return shlex.quote(s)
+
+
+def _command_of(pid):
+    """what a process is running, so a recycled process id is never mistaken for the step"""
+    return subprocess.run(["ps", "-o", "command=", "-p", str(pid)], capture_output=True, text=True).stdout
 
 
 def run_py(rest):
@@ -106,6 +173,8 @@ def main():
     if cmd not in SCRIPTS:
         print(f"ve: no step called {cmd!r}. Run `ve help` for the list.", file=sys.stderr)
         return 2
+    if cmd in LONG:
+        return run_long(cmd, rest)
     return subprocess.call([sys.executable, os.path.join(KIT, SCRIPTS[cmd])] + rest)
 
 

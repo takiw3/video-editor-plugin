@@ -128,6 +128,8 @@ def karaoke_lines(E):
         pack.update(max_words=1)
     K = {**dict(max_words=4, max_chars=24, gap=0.35, huge=[], huge_words=2, huge_chars=12), **pack, **getattr(E, "KARAOKE", {})}
     big = lambda w: any(a <= w["start"] < b for a, b in K["huge"])     # noqa: E731  ("captions come in huge")
+    wins = getattr(E, "WINDOWS", [])
+    ground = lambda t: next((g for a, b, g in wins if a - 1e-6 <= t < b - 1e-6), "foot")   # noqa: E731
     words = []
     for w in json.load(open(os.path.join(E.PROJECT, "words.json"))):
         if words and w["text"].startswith("-"):                  # "re" + "-explain" -> "re-explain"
@@ -141,7 +143,8 @@ def karaoke_lines(E):
         text = " ".join(x["text"] for x in cur)
         mw, mc = (K["huge_words"], K["huge_chars"]) if big(w) else (K["max_words"], K["max_chars"])
         if (nxt is None or w["text"][-1] in ".,?!:;" or len(cur) >= mw or big(nxt) != big(w)
-                or len(text) + 1 + len(nxt["text"]) > mc or nxt["start"] - w["end"] > K["gap"]):
+                or len(text) + 1 + len(nxt["text"]) > mc or nxt["start"] - w["end"] > K["gap"]
+                or ground(w["start"] + 0.001) != ground(nxt["start"] + 0.001)):     # a card starts or ends: new line
             out.append(cur)
             cur = []
     return out
@@ -179,12 +182,23 @@ def caption_css(E):
     return place + _preset_css(E)
 
 
+# the presets with no box are drawn for footage: on a light card they turn to the pack's ink, with no outline or shadow
+ON_LIGHT = {
+    "bold-outline": ".kc.onlight, .kc.onlight .k { color:var(--c-ink) !important; -webkit-text-stroke:0; text-shadow:none; }"
+                    " .kc.onlight .k.on { color:var(--c-accent-light) !important; }",
+    "one-word": ".kc.onlight, .kc.onlight .k { color:var(--c-ink) !important; -webkit-text-stroke:0; }",
+    "active-pill": ".kc.onlight, .kc.onlight .k { color:var(--c-ink) !important; text-shadow:none; }"
+                   " .kc.onlight .k.on { color:#fff !important; }",
+    "plain-shadow": ".kc.onlight, .kc.onlight .k { color:var(--c-ink) !important; text-shadow:none; }",
+}
+
+
 def _preset_css(E):
     name = caption_preset(E)
     if name not in CAPTION_PRESETS:
         raise SystemExit(f"caption style {name!r} isn't a preset. Choose one of: {', '.join(CAPTION_PRESETS)}")
     css = CAPTION_PRESETS[name][0]
-    return css + "\n.kc .k { display:inline-block; }" if css else ""
+    return css + " " + ON_LIGHT.get(name, "") + "\n.kc .k { display:inline-block; }" if css else ""
 
 
 def karaoke(E):
@@ -206,8 +220,11 @@ def karaoke(E):
         t0 = ln[0]["start"]
         nxt = L[i + 1][0]["start"] if i + 1 < len(L) else E.TOTAL
         t1 = nxt if nxt - ln[-1]["end"] < 0.6 else min(nxt, ln[-1]["end"] + 0.3)
+        t1 = min([t1] + [x for a, b, _ in E.WINDOWS for x in (a, b) if t0 + 1e-6 < x])   # never held across a card's edge
         spans = " ".join(f'<span class="k" id="kc{i}_{j}">{w["text"]}</span>' for j, w in enumerate(ln))
         cls = "kc huge" if any(a <= t0 < b for a, b in huge) else "kc"
+        if ground_at(E, t0 + 0.001) == "light":                       # over a light card: ink, the way captions sit on cards
+            cls += " onlight"
         html.append(f'<div class="kw"><div id="kc{i}" class="{cls}">{spans}</div></div>')
         js.append(f"on('#kc{i}', {t0:.3f}); off('#kc{i}', {min(t1, E.TOTAL):.3f});")
         lit = E.S['colors']['caption_ink']
@@ -504,7 +521,7 @@ def behind(E):
             pid = f"p{m}"
             col = color(E, B.get("color", "accent"))
             html.append(f'<div id="{pid}" class="bh" data-layout-allow-occlusion data-layout-allow-overlap '
-                        f'style="top:{B.get("top", behind_top(E, B.get("size", 196), 296))}px;left:{B.get("dx", 0)}px;font-size:{B.get("size", 196)}px;color:{col};">{B["text"]}</div>')
+                        f'style="top:{B.get("top", behind_top(E, B.get("size", 196), 296))}px;left:{B.get("dx", 0)}px;font-size:{B.get("size", 196)}px;color:{col};">{B["text"].rstrip(",;:. ")}</div>')
             js.append(f"gsap.set('#{pid}', {{opacity: 0}});")
             js.append(f"tl.fromTo('#{pid}', {{opacity: 0, y: 30}}, {{opacity: 1, y: 0, duration: 0.3, ease: 'power3.out', immediateRender: false}}, q({B['at']:.3f}));")
             js.append(f"off('#{pid}', {T(E, B['end']):.3f});")

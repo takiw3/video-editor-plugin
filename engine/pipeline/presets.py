@@ -52,10 +52,39 @@ def fit(C):
         if ST.contrast(ST.rgba(C["accent_on_light"], light), light) >= 3:
             break
         C["accent_on_light"] = shade(C["accent_on_light"], 0.85)
-    if ST.distance(ST.rgba(C["accent"]), ST.rgba(base["negative"])) < 30:
-        C["negative"], C["negative_on_light"] = "#8E7CFF", "#5A3FD6"
-    if ST.distance(ST.rgba(C["accent_on_light"]), ST.rgba(C.get("negative_on_light", base["negative_on_light"]))) < 30:
-        C["negative"], C["negative_on_light"] = "#8E7CFF", "#5A3FD6"
+    far = lambda neg, neg_light: (ST.distance(ST.rgba(C["accent"]), ST.rgba(neg)) >= 30 and  # noqa: E731
+                                  ST.distance(ST.rgba(C["accent_on_light"]), ST.rgba(neg_light)) >= 30)
+    current = (C.get("negative", base["negative"]), C.get("negative_on_light", base["negative_on_light"]))
+    if not far(*current):
+        for pair in (("#FF4D4D", "#C62828"), ("#8E7CFF", "#5A3FD6"), ("#FF4FA3", "#C2185B"), ("#FFB020", "#B26A00")):
+            if far(*pair):
+                C["negative"], C["negative_on_light"] = pair
+                break
+
+
+def retell(md, preset, S, before):
+    """STYLE.md says the same thing as style.json: their name on it, and their colours in place of the pack's. The pack's
+    prose still names its own colour ("black and yellow"), so a note under the title says which one wins."""
+    if not os.path.exists(md):
+        return
+    lines = open(md, encoding="utf-8").read().split("\n")
+    name = (S.get("creator") or {}).get("name")
+    if preset and lines and lines[0].startswith("# "):
+        lines[0] = f"# {name + chr(39) + 's' if name else 'Your'} style (from the {preset} preset)"
+    text = "\n".join(lines)
+    after = S.get("colors", {})
+    for k, old in before.items():
+        new = after.get(k)
+        if isinstance(old, str) and isinstance(new, str) and old.startswith("#") and old.upper() != new.upper():
+            text = text.replace(old, new).replace(old.upper(), new).replace(old.lower(), new)
+    old, new = before.get("accent"), after.get("accent")
+    if old and new and old.upper() != new.upper():
+        lines = [ln for ln in text.split("\n") if not ln.startswith("Your accent is ")]
+        while len(lines) > 2 and lines[1] == "" and lines[2] == "":
+            del lines[1]
+        lines[1:1] = ["", f"Your accent is {new}. Where a line below names the accent colour in words, it means this one."]
+        text = "\n".join(lines)
+    open(md, "w", encoding="utf-8").write(text)
 
 
 def main():
@@ -86,6 +115,7 @@ def main():
     for flag, key in (("--name", "name"), ("--handle", "handle"), ("--site", "site")):
         if get(flag):
             S.setdefault("creator", {})[key] = get(flag)
+    before = dict(S.get("colors", {}))
     accent = get("--accent")
     if accent:
         if not (accent.startswith("#") and len(accent) == 7):
@@ -102,6 +132,7 @@ def main():
         if ST.contrast(ST.rgba(C["textbox_ink"]), ST.rgba(C["textbox_bg"])) < 4.5:
             C["textbox_ink"] = "#0B0B0B" if ST.contrast((11, 11, 11), ST.rgba(C["textbox_bg"])) >= 4.5 else "#FFFFFF"
     json.dump(S, open(os.path.join(dest, "style.json"), "w"), indent=2)
+    retell(os.path.join(dest, "STYLE.md"), preset, S, before)
     full = ST.load(os.path.join(dest, "style.json"))
     ST.write(full, dest)
     print(os.path.join(dest, "style.json"))
