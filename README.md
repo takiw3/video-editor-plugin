@@ -18,7 +18,7 @@ In Claude Code, run these two lines:
 
 Then type `/video-editor:setup`. Claude gets everything ready, usually in a few minutes depending on your internet. You won't install anything by hand or need an admin password. It downloads about 2 GB.
 
-In Claude Cowork, add the plugin zip from the plugin menu, then ask Claude to set up the video editor.
+In Claude Cowork, download `video-editor-plugin.zip` from the [latest release](https://github.com/takiw3/video-editor-plugin/releases/latest), add it from the plugin menu, then ask Claude to set up the video editor.
 
 ## Use it
 
