@@ -3,7 +3,9 @@
 You build one or more motion-graphic beats (`edit.FX`) for a talking-head video. Start from the closest effect in
 `KIT/fx/LIBRARY.md` or the creator's own library (`HOME/fx/LIBRARY.md`; on the same name theirs wins, and your
 prompt gives the folder): copy its folder to `<project>/fx/<id>/` (no renaming needed: `{{ID}}` becomes your id) and
-change the words, the beat times and the assets. Each effect lives in its own folder and is composited into the
+change the words, the beat times and the assets. An `FX` entry whose folder doesn't exist yet gets the library folder
+copied in by the build: `dict(id="snap-zoom-2", like="snap-zoom", layer="top", at=..., end=...)` (no `like` means the
+id is the library name). Generators marked `AUTO = True` run on that copy. Edit the project copy, never the library. Each effect lives in its own folder and is composited into the
 video's single HyperFrames/GSAP timeline by `pipeline/build.py`. You never touch the footage timing, the cut or
 another agent's folder.
 

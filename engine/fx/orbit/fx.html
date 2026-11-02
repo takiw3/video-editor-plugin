@@ -1,0 +1,23 @@
+<!-- orbit: a dashed ring draws around the head and six tool tiles ride it, bigger and in front on the near side,
+     smaller on the far side and hidden while they pass behind the head. Generic tool glyphs (sound, cut, type,
+     captions, play, spark), one in the accent. Ring, head and timing: fx.js. -->
+<svg id="{{ID}}-ring" width="1080" height="1920" viewBox="0 0 1080 1920" data-layout-allow-overlap data-layout-allow-occlusion>
+  <ellipse id="{{ID}}-el" cx="0" cy="0" rx="10" ry="10" fill="none" stroke-width="3" stroke-dasharray="10 14"/>
+</svg>
+<div id="{{ID}}-t0" class="{{ID}}-tile" data-layout-allow-overlap data-layout-allow-occlusion><div class="{{ID}}-in"><svg viewBox="0 0 48 48"><path d="M8 20v8M16 12v24M24 6v36M32 14v20M40 20v8"/></svg></div></div>
+<div id="{{ID}}-t1" class="{{ID}}-tile" data-layout-allow-overlap data-layout-allow-occlusion><div class="{{ID}}-in"><svg viewBox="0 0 48 48"><circle cx="13" cy="36" r="6"/><circle cx="35" cy="36" r="6"/><path d="M17 31L36 6M31 31L12 6"/></svg></div></div>
+<div id="{{ID}}-t2" class="{{ID}}-tile" data-layout-allow-overlap data-layout-allow-occlusion><div class="{{ID}}-in {{ID}}-txt">Aa</div></div>
+<div id="{{ID}}-t3" class="{{ID}}-tile" data-layout-allow-overlap data-layout-allow-occlusion><div class="{{ID}}-in"><svg viewBox="0 0 48 48"><rect x="5" y="10" width="38" height="28" rx="5"/><path d="M21 20a5 5 0 1 0 0 8M34 20a5 5 0 1 0 0 8"/></svg></div></div>
+<div id="{{ID}}-t4" class="{{ID}}-tile" data-layout-allow-overlap data-layout-allow-occlusion><div class="{{ID}}-in"><svg viewBox="0 0 48 48"><path d="M16 10l22 14-22 14z" class="{{ID}}-fill"/></svg></div></div>
+<div id="{{ID}}-t5" class="{{ID}}-tile {{ID}}-hot" data-layout-allow-overlap data-layout-allow-occlusion><div class="{{ID}}-in"><svg viewBox="0 0 48 48"><path d="M24 4c2 12 8 18 20 20-12 2-18 8-20 20-2-12-8-18-20-20 12-2 18-8 20-20z" class="{{ID}}-fill"/></svg></div></div>
+<style>
+#{{ID}}-ring { position:absolute; left:0; top:0; }
+#{{ID}}-el { stroke:var(--c-light); opacity:.6; }
+.{{ID}}-tile { position:absolute; left:0; top:0; width:136px; height:136px; }
+.{{ID}}-in { width:136px; height:136px; border-radius:calc(var(--radius) + 14px); background:var(--c-dark); border:2px solid var(--c-hair-dark);
+  display:flex; align-items:center; justify-content:center; color:var(--c-light); box-shadow:0 10px 22px color-mix(in srgb, var(--c-dark) 30%, transparent); }
+.{{ID}}-hot .{{ID}}-in { background:var(--c-accent); border-color:var(--c-accent); }
+.{{ID}}-in svg { width:68px; height:68px; fill:none; stroke:currentColor; stroke-width:4; stroke-linecap:round; stroke-linejoin:round; }
+.{{ID}}-in svg .{{ID}}-fill { fill:currentColor; stroke:none; }
+.{{ID}}-txt { font-family:var(--font-display); font-weight:var(--display-weight); font-size:56px; line-height:1; }
+</style>

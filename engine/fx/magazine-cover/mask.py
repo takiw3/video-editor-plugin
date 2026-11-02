@@ -24,6 +24,8 @@ import numpy as np
 from PIL import Image, ImageFilter
 from scipy import ndimage
 
+AUTO = True        # the build runs this once when it copies the effect into a project
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 W, H = 1080, 1920
 

@@ -1,0 +1,22 @@
+<!-- digital-zoom: a camera viewfinder (corner brackets, REC, a zoom readout and the video's own running timecode) and
+     the picture steps in digitally on the words, each step a hard jump with a two-frame soft focus, then back out.
+     The steps move #fxcam; the viewfinder sits on top and never zooms. Steps and cue words: fx.js. -->
+<div id="{{ID}}-hud" data-layout-allow-overlap data-layout-allow-occlusion>
+  <div class="{{ID}}-c {{ID}}-tl"></div><div class="{{ID}}-c {{ID}}-tr"></div>
+  <div class="{{ID}}-c {{ID}}-bl"></div><div class="{{ID}}-c {{ID}}-br"></div>
+  <div id="{{ID}}-rec" data-layout-allow-overlap><span id="{{ID}}-dot"></span>REC</div>
+  <div id="{{ID}}-x" data-layout-allow-overlap>1.0×</div>
+  <div id="{{ID}}-tc" data-layout-allow-overlap>00:00:00:00</div>
+</div>
+<style>
+#{{ID}}-hud { position:absolute; left:0; top:0; width:1080px; height:1920px; }
+.{{ID}}-c { position:absolute; width:90px; height:90px; border:0 solid var(--c-light); }
+.{{ID}}-tl { left:70px; top:240px; border-left-width:6px; border-top-width:6px; }
+.{{ID}}-tr { right:70px; top:240px; border-right-width:6px; border-top-width:6px; }
+.{{ID}}-bl { left:70px; top:1360px; border-left-width:6px; border-bottom-width:6px; }
+.{{ID}}-br { right:70px; top:1360px; border-right-width:6px; border-bottom-width:6px; }
+#{{ID}}-rec { position:absolute; left:110px; top:262px; font-family:var(--font-mono); font-size:30px; color:var(--c-light); letter-spacing:.08em; display:flex; align-items:center; gap:12px; }
+#{{ID}}-dot { width:20px; height:20px; border-radius:50%; background:var(--c-neg); display:inline-block; }
+#{{ID}}-x { position:absolute; left:440px; top:252px; width:200px; text-align:center; font-family:var(--font-mono); font-size:34px; color:var(--c-light); border:3px solid var(--c-light); border-radius:999px; padding:6px 0; }
+#{{ID}}-tc { position:absolute; right:110px; top:262px; font-family:var(--font-mono); font-size:30px; color:var(--c-light); }
+</style>

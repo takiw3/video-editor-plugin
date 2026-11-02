@@ -1,0 +1,13 @@
+<!-- frame-break: the frame cracks from a point (light crack lines draw out, the camera jolts), then shatters: the
+     picture breaks into shards (a still of that moment, pulled by gen.py) that fly out and fall with gravity over the
+     dark ground, and the live shot cuts back in. Everything is built in fx.js. -->
+<div id="{{ID}}-g" data-layout-allow-overlap data-layout-allow-occlusion></div>
+<div id="{{ID}}-sh" data-layout-allow-overlap data-layout-allow-occlusion></div>
+<svg id="{{ID}}-ck" width="1080" height="1920" viewBox="0 0 1080 1920" data-layout-allow-overlap data-layout-allow-occlusion></svg>
+<style>
+#{{ID}}-g { position:absolute; left:-200px; top:-200px; width:1480px; height:2320px; background:var(--c-dark); }
+#{{ID}}-sh { position:absolute; left:0; top:0; width:1080px; height:1920px; }
+.{{ID}}-p { position:absolute; left:0; top:0; width:1080px; height:1920px; background-size:1080px 1920px; background-repeat:no-repeat; }
+#{{ID}}-ck { position:absolute; left:0; top:0; }
+#{{ID}}-ck polyline { fill:none; stroke:var(--c-light); stroke-width:4; stroke-linejoin:round; stroke-linecap:round; }
+</style>

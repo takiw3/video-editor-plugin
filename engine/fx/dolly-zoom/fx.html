@@ -1,0 +1,8 @@
+<!-- dolly-zoom: the vertigo shot. The speaker stays exactly where they are while the room behind them pulls away
+     (or rushes in), so the space seems to stretch. Two synced copies of the footage behind the cutout: the room, scaled
+     about the bottom centre, and a soft copy under it that fills the edges. Behind the head. fx.js. -->
+<video id="{{ID}}-u" src="clean.mp4" muted playsinline data-start="{{START+0.0333}}" data-media-start="{{SYNC+0.0333}}" data-duration="{{DUR-0.0333}}" data-track-index="{{T0}}"></video>
+<video id="{{ID}}-v" class="g" src="clean.mp4" muted playsinline data-start="{{START}}" data-media-start="{{SYNC}}" data-duration="{{DUR}}" data-track-index="{{T1}}"></video>
+<style>
+#{{ID}}-u, #{{ID}}-v { position:absolute; left:0; top:0; width:1080px; height:1920px; object-fit:cover; }
+</style>

@@ -83,7 +83,9 @@ video, and every event lands on a word from `words.json`.
 - **Effects**: `FXLIB`, `TRANSITIONS`, `AUDIO_FX` from the library, `FX` for hand-built moments. `KIT/kit/EFFECTS.md` shows every
   field and what doesn't combine. Named by them: use it (match loosely, say which you picked, offer the two closest if you
   can't match). Not named: choose from the top picks (`VE effects list --featured`). One look, one transition style, one
-  text style, and an effect only where the words motivate it.
+  text style, and an effect only where the words motivate it. A hand-built `FX` named in the list gets copied into the
+  project by the build (`like="<folder>"` for a second copy); the starter pack (orbit, snap zoom, frame break, phone
+  mockup and the rest of the twenty in `EFFECTS.md`) works from its defaults with just a window on the word.
 - **Camera**: `CAMERA` punch-ins and zooms on the phrases that matter. A locked camera reads as a screen recording.
 - **The end**: a CTA they actually said, on screen. No end card unless they ask.
 - **Pace** from the pack's `motion`.

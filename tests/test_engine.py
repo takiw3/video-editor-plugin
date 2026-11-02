@@ -200,6 +200,52 @@ class LongSteps(unittest.TestCase):
                 cutout.HF, cutout.PROGRESS_EVERY, sys.argv = old
 
 
+class StarterPack(unittest.TestCase):
+    PACK = ("orbit", "chat-takeover", "frame-escape", "snap-zoom", "checklist-pop", "headline-storm", "zoom-portal",
+            "growth-curve", "studio-reveal", "broll-overlay", "paper-cutout", "dolly-zoom", "magazine-cover",
+            "liquid-glass", "zoom-through", "green-screen", "frame-break", "digital-zoom", "phone-mockup", "checklist")
+
+    def test_all_twenty_are_in_the_library(self):
+        lib = open(os.path.join(ENG, "fx", "LIBRARY.md")).read()
+        for name in self.PACK:
+            for f in ("fx.html", "fx.js"):
+                self.assertTrue(os.path.exists(os.path.join(ENG, "fx", name, f)), f"{name}/{f}")
+            self.assertIn(f"| `{name}` |", lib, name)
+
+    def test_the_example_uses_all_twenty(self):
+        src = open(os.path.join(ENG, "examples", "effects", "edit.py")).read()
+        self.assertEqual(re.findall(r'dict\(id="([\w-]+)"', src), list(self.PACK))
+
+    def test_colours_come_from_the_pack(self):
+        colour = re.compile(r"#[0-9a-fA-F]{3,8}\b|rgba?\(")
+        hits = []
+        for name in self.PACK:
+            for f in ("fx.html", "fx.js"):
+                for n, line in enumerate(open(os.path.join(ENG, "fx", name, f)), 1):
+                    if colour.search(line.replace("{{ID}}", "")) and not line.startswith("var CHROMA"):
+                        hits.append(f"{name}/{f}:{n}")
+        self.assertEqual(hits, [])
+
+    def test_the_build_copies_an_effect_by_name(self):
+        import types
+        import build
+        import common
+        old = common.HOME
+        with tempfile.TemporaryDirectory() as d:
+            common.HOME = os.path.join(d, "home")                          # no creator library: the kit's
+            try:
+                E = types.SimpleNamespace(FX=[dict(id="snap-zoom"), dict(id="snap-2", like="snap-zoom"), dict(id="made-up")])
+                build.provision_fx(E, d)
+                build.provision_fx(E, d)                                   # a second build leaves the copies alone
+            finally:
+                common.HOME = old
+            for fid in ("snap-zoom", "snap-2"):
+                self.assertEqual(open(os.path.join(d, "fx", fid, "fx.js")).read(),
+                                 open(os.path.join(ENG, "fx", "snap-zoom", "fx.js")).read())
+            self.assertFalse(os.path.exists(os.path.join(d, "fx", "made-up")))
+            self.assertFalse(os.path.exists(os.path.join(d, "fx", "snap-zoom", "preview.jpg")))
+
+
 class Plugin(unittest.TestCase):
     def test_manifest(self):
         d = json.load(open(os.path.join(ROOT, ".claude-plugin", "plugin.json")))

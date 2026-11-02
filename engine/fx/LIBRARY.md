@@ -64,6 +64,35 @@ let the creator name one (SKILL.md "Effects by name"). Their previews come from 
 | `comment-drop` | top | the CTA hovering above the head: a comment composer slides in, the keyword's letters pop in big and fall with gravity into it one by one (the field types each), it posts and lifts, the reply (headshot, handle) drops in under it word by word, a like, both float away; the big letters split light/dark against the picture via per-frame masks | "comment X below" (the comment-cta alternative) | KEYWORD, the cue words, REPLY, HANDLE, HEADSHOT (until then a token circle with INITIALS), GROUP_Y measured on the shot (GROUP_Y + 292 sits on the head top); `gen.py <project>` rebuilds masks.png from clean.mp4 |
 | `shape-transitions` | cam | a different shape-mask transition per picture cut (iris, blinds, barn doors, match push, clock wipe) in the frames before the cut, the incoming side a pre-roll handle in sync with the J-cut audio; a cut a full-frame effect covers is left alone | every picture cut (the camera-transitions alternative) | nothing: `handles.py <project>` cuts the handles from edit.SRC like cut.py and writes fx.html (rerun when KEEP, SHOTS or FX change); SHAPES, ONLY, SKIP, FRAMES_PER, FACE in fx.js |
 
+## Added in 1.2.0: the starter pack
+Nineteen more, the effects from the "20 Video Effects Created by Claude" reel, so a new user gets that look out of
+the box. With `magazine-cover` above, that's all twenty. Every one is ready to drop in by name: list it in `FX` with
+`like="<folder>"` (or just its folder name as the id) and the build copies it into the project, so there's nothing to
+copy by hand. Each one's constants have working defaults, and the ones that read the speaker's words (the headlines,
+the chat prompt, the checklist) fill themselves from `words.json`. Their previews are frames from that reel.
+
+| folder | layer | what it does | reach for it when the line says | supply |
+|---|---|---|---|---|
+| `orbit` | top | a dashed ring opens round the head and six tool tiles orbit it, bigger on the near side, hidden behind the head on the far side | lists of tools, "everything around me", an opener | nothing; CENTER / HEAD from a still |
+| `chat-takeover` | cam | the dark ground cuts in, a chat window rises and the shot shrinks into its attachment (still playing, in sync), the instruction types into the message, then the shot grows back out | "I told the AI", "I asked Claude", any line about prompting | PROMPT in their words (`''` takes the video's first sentence) |
+| `frame-escape` | behind | the shot shrinks and tilts into a framed photo on the dark ground and the head breaks out over its top edge | "breaking out", "outside the box", "step out of" | EDGE (the photo's top edge, just under the chin); a CUT_WINDOWS entry |
+| `snap-zoom` | top | two hard punch-ins on the words with a white flash and a shake, then back out | one emphatic word, a reveal, "look at this" | the two cue words; ORIGIN on the face |
+| `checklist-pop` | top | ticked pills pop in beside the head one per word, the tick drawing itself, the camera bumping on each | a short list of finished things | the items and the word each lands on |
+| `headline-storm` | behind | five headline strips (BREAKING, JUST IN...) slam in from the sides behind the head, the camera jolting on each | "everyone's talking about", a launch, hype | nothing (takes their own lines) or HEADLINES; a CUT_WINDOWS entry |
+| `zoom-portal` | cam | a round portal opens in the frame showing the shot, then the camera dives through it into the next beat | "let's go inside", "zoom in on", a turn into detail | the cue word; PORTAL / FOCUS from a still |
+| `growth-curve` | behind | the room goes dark and an exponential curve draws itself behind the head while a chip counts up to the number | growth, "10x", results, a number going up | VALUE, SUFFIX, LABEL; SAMPLE stays true (it says SAMPLE DATA) until the number is real |
+| `studio-reveal` | behind | the room goes dark, two softboxes flicker on behind the speaker and an ON AIR sign lights | "it looks like a studio", a production-quality line, going live | the cue word; a CUT_WINDOWS entry |
+| `broll-overlay` | top | edit tracks with a playhead slide in above the head and a window card plays the b-roll clip over the shot | "here's the clip", showing what they're talking about | the clip: `ve py fx/<id>/gen.py <project> <id> <clip> [start]` (until then it plays a labelled placeholder) |
+| `paper-cutout` | behind | an accent paper ground slaps in on threes with shapes that drop and boil behind the head, and the speaker gets a white sticker edge | playful lines, "make it fun", a craft or DIY feel | nothing; a CUT_WINDOWS entry and the cutout |
+| `dolly-zoom` | behind | the room stretches away behind the speaker while they stay the same size (the vertigo shot) | a realisation, "wait", a shock | nothing; a CUT_WINDOWS entry and the cutout |
+| `liquid-glass` | top | a glass lens drifts across the frame, magnifying and rippling what's under it | "glass", "clean", a premium or Apple-like line | PATH (where the lens travels) |
+| `zoom-through` | top | the camera rushes into the face, flashes, and lands on the next shot already zoomed, then settles | a transition between two points, "and then" | the cut word (CUT_ON) and POINT on the face |
+| `green-screen` | behind | a green screen rolls down behind the speaker like a backdrop, holds, then rolls back up | "green screen", "I'm not really here", a fake-backdrop joke | the cue word; a CUT_WINDOWS entry and the cutout (the one colour that isn't from the pack) |
+| `frame-break` | cam | the shot cracks from an impact point, then shatters into shards of itself that fly out over the dark ground | "break", "smash", "this changes everything" | the cue word (HIT_ON) and IMPACT; `gen.py` grabs the frame it breaks on, automatically |
+| `digital-zoom` | top | a camera HUD (corners, REC, zoom readout, running timecode) and two stepped digital zooms with a blur on each step | "zoom in", "enhance", a security-camera bit | the two cue words; ORIGIN on the face |
+| `phone-mockup` | cam | the shot shrinks into a phone on the dark ground, still playing, tilted, then grows back | "on your phone", "posted it", an app line | nothing; HANDLE for the handle on screen |
+| `checklist` | top | a full-frame checklist with a big counter that ticks every effect in the video, one after another | the end of an "N things" video | nothing (lists the video's own effects) or ITEMS |
+
 ## Rules that came out of building these
 - `hyperframes check` gates the render: every `<video>` needs an id (else it renders frozen), no tweening layout
   props (left, top, letterSpacing: use x / y / scale), no CSS `transform` on an element GSAP tweens, overlap and

@@ -383,6 +383,31 @@ def fx_times(markup, A, B):
                   lambda m: f"{round((B - A - float(m.group(1) or 0)) * 30) / 30:.4f}", markup)
 
 
+def provision_fx(E, project):
+    """an FX entry whose folder isn't in the project yet comes from the library by name: the creator's own HOME/fx
+    first, then the kit's fx/. `like` names the library effect when the id differs (the same effect twice:
+    dict(id="snap-zoom-2", like="snap-zoom", ...)). A library effect whose gen.py or mask.py says AUTO = True runs it once,
+    so it works with no setup (frame-break pulls its still, magazine-cover fits its masks to the shot)."""
+    import shutil
+    import subprocess
+    from common import HOME, PY
+    for F in getattr(E, "FX", []):
+        d = os.path.join(project, "fx", F["id"])
+        if os.path.exists(os.path.join(d, "fx.html")):
+            continue
+        name = F.get("like", F["id"])
+        src = next((os.path.join(r, name) for r in (os.path.join(HOME, "fx"), os.path.join(KIT, "fx"))
+                    if os.path.exists(os.path.join(r, name, "fx.html"))), None)
+        if not src:
+            continue                                      # left to the effect's builder: shows as pending
+        shutil.copytree(src, d, dirs_exist_ok=True, ignore=shutil.ignore_patterns("preview.jpg", "__pycache__"))
+        for g in ("gen.py", "mask.py"):
+            gen = os.path.join(d, g)
+            if os.path.exists(gen) and "\nAUTO = True" in open(gen, encoding="utf-8").read():
+                subprocess.run([PY, gen, project, F["id"]], check=True)
+        print(f"fx {F['id']}: copied from the library ({name})")
+
+
 def sync_fx(E, project, pub):
     """fx assets (everything in fx/<id>/ but fx.html / fx.js / notes) -> public/fx/<id>/"""
     import shutil
@@ -899,6 +924,7 @@ def main():
     pub = os.path.join(project, "public")
     ST.install(E.S, pub)
     sync_cards(E, project, pub)
+    provision_fx(E, project)
     sync_fx(E, project, pub)
     with open(os.path.join(pub, "index.html"), "w", encoding="utf-8") as fh:
         fh.write(build(E, TL, safe="--safe" in sys.argv, stills="--stills" in sys.argv))

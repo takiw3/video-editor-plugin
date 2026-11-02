@@ -1,0 +1,12 @@
+<!-- zoom-portal: a round portal opens beside the head with a small copy of the shot inside (lips in sync), ringed in
+     the accent; on the dive word it swallows the frame, the copy growing to full size so it lands exactly on the live
+     shot. A synced copy of clean.mp4 timed by the build. Portal, focus and words: fx.js. -->
+<div id="{{ID}}-p" data-layout-allow-overlap data-layout-allow-occlusion>
+  <video id="{{ID}}-v" class="g" src="clean.mp4" muted playsinline data-start="{{START}}" data-media-start="{{SYNC}}" data-duration="{{DUR}}" data-track-index="{{T0}}"></video>
+</div>
+<div id="{{ID}}-r" data-layout-allow-overlap data-layout-allow-occlusion></div>
+<style>
+#{{ID}}-p { position:absolute; left:0; top:0; width:1080px; height:1920px; clip-path:circle(0px at 0px 0px); }
+#{{ID}}-v { position:absolute; left:0; top:0; width:1080px; height:1920px; object-fit:cover; }
+#{{ID}}-r { position:absolute; left:0; top:0; width:200px; height:200px; border-radius:50%; border:7px solid var(--c-accent); box-sizing:border-box; }
+</style>

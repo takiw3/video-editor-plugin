@@ -1,0 +1,24 @@
+<!-- paper-cutout: stop-motion collage. A ground in the accent slaps in behind the speaker, cut-paper shapes (a
+     disc, a star, strips, dots) drop in and boil on threes like stop motion, and the speaker gets a sticker edge in
+     the light colour with a flat paper shadow. Behind the head. fx.js. -->
+<div id="{{ID}}-g" data-layout-allow-overlap data-layout-allow-occlusion>
+  <div id="{{ID}}-s0" class="{{ID}}-sh {{ID}}-disc"></div>
+  <div id="{{ID}}-s1" class="{{ID}}-sh {{ID}}-star"><svg viewBox="0 0 100 100"><path d="M50 4l13 31 33 3-25 22 8 33-29-18-29 18 8-33L4 38l33-3z"/></svg></div>
+  <div id="{{ID}}-s2" class="{{ID}}-sh {{ID}}-strip"></div>
+  <div id="{{ID}}-s3" class="{{ID}}-sh {{ID}}-strip2"></div>
+  <div id="{{ID}}-s4" class="{{ID}}-sh {{ID}}-dot"></div>
+  <div id="{{ID}}-s5" class="{{ID}}-sh {{ID}}-dot2"></div>
+  <div id="{{ID}}-s6" class="{{ID}}-sh {{ID}}-ring"></div>
+</div>
+<style>
+#{{ID}}-g { position:absolute; left:-40px; top:-40px; width:1160px; height:2000px; background:var(--c-accent); }
+.{{ID}}-sh { position:absolute; }
+.{{ID}}-disc { left:760px; top:400px; width:380px; height:380px; border-radius:50%; background:var(--c-s2); }
+.{{ID}}-star { left:90px; top:640px; width:220px; height:220px; }
+.{{ID}}-star svg { width:220px; height:220px; fill:var(--c-dark); }
+.{{ID}}-strip { left:-80px; top:1500px; width:820px; height:84px; background:var(--c-light); }
+.{{ID}}-strip2 { left:700px; top:1180px; width:560px; height:60px; background:var(--c-dark); }
+.{{ID}}-dot { left:1010px; top:1250px; width:64px; height:64px; border-radius:50%; background:var(--c-light); }
+.{{ID}}-dot2 { left:180px; top:1150px; width:44px; height:44px; border-radius:50%; background:var(--c-s2); }
+.{{ID}}-ring { left:190px; top:300px; width:150px; height:150px; border-radius:50%; border:16px solid var(--c-light); box-sizing:border-box; }
+</style>

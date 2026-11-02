@@ -1,0 +1,24 @@
+<!-- growth-curve: the room goes dark behind the speaker, a grid comes up and a curve in the accent draws from bottom
+     left to top right, a dot riding its tip, while a chip counts up to the number. Says SAMPLE DATA unless the number
+     is real. Behind the head (the speaker stays in front). Number, label, shape: fx.js. -->
+<div id="{{ID}}-g" data-layout-allow-overlap data-layout-allow-occlusion>
+  <svg id="{{ID}}-svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+    <g id="{{ID}}-grid"></g>
+    <path id="{{ID}}-cv" d="M0 0" fill="none" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle id="{{ID}}-dot" cx="0" cy="0" r="17" stroke-width="7"/>
+  </svg>
+  <div id="{{ID}}-chip" data-layout-allow-overlap><span id="{{ID}}-n">1×</span><span id="{{ID}}-l">GROWTH</span></div>
+  <div id="{{ID}}-sm" data-layout-allow-overlap>SAMPLE DATA</div>
+</div>
+<style>
+#{{ID}}-g { position:absolute; left:0; top:0; width:1080px; height:1920px; background:var(--c-dark); }
+#{{ID}}-svg { position:absolute; left:0; top:0; }
+#{{ID}}-grid line { stroke:var(--c-hair-dark); stroke-width:2; }
+#{{ID}}-cv { stroke:var(--c-accent); }
+#{{ID}}-dot { fill:var(--c-light); stroke:var(--c-accent); }
+#{{ID}}-chip { position:absolute; right:60px; top:250px; display:flex; align-items:baseline; gap:14px; background:var(--c-accent); color:var(--c-light);
+  padding:10px 22px 12px; border-radius:var(--radius); }
+#{{ID}}-n { font-family:var(--font-display); font-weight:var(--display-weight); font-size:72px; line-height:1; }
+#{{ID}}-l { font-family:var(--font-mono); font-size:24px; letter-spacing:.1em; }
+#{{ID}}-sm { position:absolute; left:70px; top:268px; font-family:var(--font-mono); font-size:24px; letter-spacing:.12em; color:var(--c-muted-dark); }
+</style>

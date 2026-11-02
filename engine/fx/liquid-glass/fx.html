@@ -1,0 +1,23 @@
+<!-- liquid-glass: a round lens of clear liquid drifts across the frame, magnifying and rippling what's under it (a
+     synced copy of the footage seen through a moving displacement), with a thin light rim and a small highlight.
+     Refraction, not frosting: no blur, no glow. Path, size, strength: fx.js. -->
+<svg width="0" height="0" style="position:absolute;" aria-hidden="true">
+  <filter id="{{ID}}-warp" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+    <feTurbulence id="{{ID}}-turb" type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="2" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="40" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+<div id="{{ID}}-lens" data-layout-allow-overlap data-layout-allow-occlusion>
+  <div id="{{ID}}-w">
+    <video id="{{ID}}-v" class="g" src="clean.mp4" muted playsinline data-start="{{START}}" data-media-start="{{SYNC}}" data-duration="{{DUR}}" data-track-index="{{T0}}"></video>
+  </div>
+</div>
+<div id="{{ID}}-rim" data-layout-allow-overlap data-layout-allow-occlusion><div id="{{ID}}-hi"></div></div>
+<style>
+#{{ID}}-lens { position:absolute; left:0; top:0; width:1080px; height:1920px; clip-path:circle(0px at 0px 0px); }
+#{{ID}}-w { position:absolute; left:0; top:0; width:1080px; height:1920px; filter:url(#{{ID}}-warp); }
+#{{ID}}-v { position:absolute; left:0; top:0; width:1080px; height:1920px; object-fit:cover; }
+#{{ID}}-rim { position:absolute; left:0; top:0; width:200px; height:200px; border-radius:50%; box-sizing:border-box;
+  border:2px solid color-mix(in srgb, var(--c-light) 75%, transparent); }
+#{{ID}}-hi { position:absolute; left:34px; top:24px; width:70px; height:34px; border-radius:50%; background:color-mix(in srgb, var(--c-light) 45%, transparent); transform:rotate(-28deg); }
+</style>

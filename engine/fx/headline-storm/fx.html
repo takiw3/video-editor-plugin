@@ -1,0 +1,12 @@
+<!-- headline-storm: news strips slam in behind the head from alternating sides, tilted, each with a kicker tag in
+     the accent and a headline in the display face, the camera jolting on each. The head breaks every strip. The
+     headlines default to the speaker's own lines (words.json), so nothing on screen is invented. fx.js. -->
+<div id="{{ID}}-s" data-layout-allow-overlap data-layout-allow-occlusion></div>
+<style>
+#{{ID}}-s { position:absolute; left:0; top:0; width:1080px; height:1920px; }
+.{{ID}}-b { position:absolute; left:-260px; width:1600px; height:100px; background:var(--c-light); display:flex; align-items:center; gap:24px;
+  padding-left:290px; box-shadow:0 12px 26px color-mix(in srgb, var(--c-dark) 30%, transparent); overflow:hidden; }
+.{{ID}}-k { flex:none; background:var(--c-accent); color:var(--c-light); font-family:var(--font-mono); font-size:24px; letter-spacing:.1em; padding:8px 14px; }
+.{{ID}}-h { flex:none; color:var(--c-ink); font-family:var(--font-display); font-weight:var(--display-weight); font-style:var(--display-style);
+  font-size:58px; line-height:1; text-transform:uppercase; white-space:nowrap; }
+</style>

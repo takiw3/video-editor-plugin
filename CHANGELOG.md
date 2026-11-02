@@ -2,6 +2,19 @@
 
 Your style, your projects and your finished videos live in `~/video-editor/`, outside the plugin, so an update never touches them.
 
+## 1.2.0
+The starter pack: the twenty effects from the "20 Video Effects Created by Claude" reel now come built in, so a new
+edit can look good from the first try.
+- Nineteen new hand-built effects: orbit, chat takeover, frame escape, snap zoom, checklist pop, headline storm, zoom
+  portal, growth curve, studio reveal, b-roll overlay, paper cutout, dolly zoom, liquid glass, zoom through cut, green
+  screen, frame break, digital zoom, phone mockup and checklist. With the magazine cover that was already there, that's
+  all twenty. 244 effects in all.
+- Ask for any hand-built effect by name and the build copies it into the project by itself. No more copying folders.
+  `like="<name>"` uses one twice in a video.
+- Effects that need words (headlines, the chat prompt, the checklist) take them from what you said, so the defaults work.
+- A worked example, `engine/examples/effects/edit.py`, uses all twenty on one video.
+- The README opens with a step-by-step quick start.
+
 ## 1.1.0
 Fixes from editing real videos end to end in studio and flex. After updating, Claude runs setup once more by itself.
 - The long steps (cutout, render, the first transcription) keep running if Claude's session ends partway, and asking

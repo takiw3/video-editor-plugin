@@ -5,7 +5,7 @@ description: Shows the video effects library and tries an effect on the person's
 
 # Effects
 
-225 effects, all usable by name or by describing what you want. Commands run through `VE` = `~/video-editor/bin/ve`.
+244 effects, all usable by name or by describing what you want. Commands run through `VE` = `~/video-editor/bin/ve`.
 
 ## Browse
 

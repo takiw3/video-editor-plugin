@@ -1,0 +1,13 @@
+<!-- frame-escape: the whole shot shrinks and tilts into a framed photo on the dark ground, and the speaker's head and
+     shoulders break out over the photo's top edge. The camera (#fxcam) carries the footage, the cutout and this layer
+     together, so everything lines up; this layer draws the frame line and a blind that darkens everything above the
+     photo's top edge, behind the head. Edge and scale: fx.js. -->
+<div id="{{ID}}-out" data-layout-allow-overlap data-layout-allow-occlusion></div>
+<div id="{{ID}}-blind" data-layout-allow-overlap data-layout-allow-occlusion><div id="{{ID}}-edge"></div></div>
+<div id="{{ID}}-sides" data-layout-allow-overlap data-layout-allow-occlusion></div>
+<style>
+#{{ID}}-out { position:absolute; left:0; top:0; width:1080px; height:1920px; box-shadow:0 0 0 2600px var(--c-dark); }
+#{{ID}}-blind { position:absolute; left:-2600px; top:-2600px; width:6280px; height:2600px; background:var(--c-dark); }
+#{{ID}}-edge { position:absolute; left:2600px; bottom:-14px; width:1080px; height:14px; background:var(--c-light); }
+#{{ID}}-sides { position:absolute; left:0; top:0; width:1080px; height:1920px; box-sizing:border-box; border:14px solid var(--c-light); border-top-width:0; }
+</style>

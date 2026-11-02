@@ -1,0 +1,12 @@
+<!-- green-screen: a chroma green backdrop wipes down behind the speaker like a pulled-down screen (soft vertical
+     folds in it), holds, and rolls back up. Behind the head. The green is the subject itself, so it's the one colour
+     in the library that isn't a style token (CHROMA in fx.js). -->
+<div id="{{ID}}-g" data-layout-allow-overlap data-layout-allow-occlusion>
+  <i style="left:150px"></i><i style="left:390px"></i><i style="left:700px"></i><i style="left:930px"></i>
+  <div id="{{ID}}-hem"></div>
+</div>
+<style>
+#{{ID}}-g { position:absolute; left:0; top:0; width:1080px; height:1920px; clip-path:inset(0px 0px 1920px 0px); }
+#{{ID}}-g i { position:absolute; top:0; width:70px; height:1920px; background:color-mix(in srgb, var(--c-dark) 7%, transparent); }
+#{{ID}}-hem { position:absolute; left:0; bottom:0; width:1080px; height:18px; background:color-mix(in srgb, var(--c-dark) 16%, transparent); }
+</style>

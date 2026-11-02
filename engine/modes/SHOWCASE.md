@@ -3,7 +3,7 @@
 The third mode, next to hi-fi and lo-fi. Works on any footage, a 4K sit-down or a phone selfie: the footage only
 decides FRAMES and the cutout. Set `STYLE = "showcase"`. The build uses the lo-fi type system (word-by-word captions,
 text boxes, overlays, backdrops) plus `FX`: one hand-built motion graphic per beat, from `fx/LIBRARY.md` or new.
-Reference: `examples/showcase/edit.py`.
+Reference: `examples/showcase/edit.py`. All twenty starter-pack effects on one video, ready to copy from: `examples/effects/edit.py`.
 
 The look is the creator's: `<project>/style/STYLE.md` (its Showcase section) and `modes.showcase` in `style.json`
 decide how an emphatic word lands (stamp, slam or scale), which transitions the edit may use, how dense it gets and

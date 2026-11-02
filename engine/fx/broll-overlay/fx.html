@@ -1,0 +1,32 @@
+<!-- broll-overlay: a window card slides up over the speaker playing the B-roll, and a two-track timeline above it
+     (B-ROLL over TALKING HEAD) shows what's happening, a playhead running across. Until a real clip is supplied it
+     plays a copy of the video's own footage with a PLACEHOLDER chip. Supply the clip with gen.py. Labels: fx.js. -->
+<div id="{{ID}}-tlb" data-layout-allow-overlap data-layout-allow-occlusion>
+  <div class="{{ID}}-tr"><span class="{{ID}}-lb" id="{{ID}}-l1">B-ROLL</span><span class="{{ID}}-bar {{ID}}-a" id="{{ID}}-b1"></span></div>
+  <div class="{{ID}}-tr"><span class="{{ID}}-lb" id="{{ID}}-l2">TALKING HEAD</span><span class="{{ID}}-bar {{ID}}-s" id="{{ID}}-b2"></span></div>
+  <div id="{{ID}}-ph"></div>
+</div>
+<div id="{{ID}}-card" data-layout-allow-overlap data-layout-allow-occlusion>
+  <div id="{{ID}}-top"><i></i><i></i><i></i><span id="{{ID}}-t">B-ROLL</span></div>
+  <div id="{{ID}}-scr">
+    <video id="{{ID}}-v" src="clean.mp4" muted playsinline data-start="{{START}}" data-media-start="{{SYNC}}" data-duration="{{DUR}}" data-track-index="{{T0}}"></video>
+    <div id="{{ID}}-ph-chip" data-layout-allow-overlap>PLACEHOLDER: your clip</div>
+  </div>
+</div>
+<style>
+#{{ID}}-tlb { position:absolute; left:70px; top:250px; width:940px; height:120px; }
+.{{ID}}-tr { position:relative; height:46px; margin-bottom:12px; display:flex; align-items:center; gap:14px; }
+.{{ID}}-lb { width:210px; flex:none; font-family:var(--font-mono); font-size:28px; letter-spacing:.08em; color:var(--c-light); }
+.{{ID}}-bar { height:40px; border-radius:calc(var(--radius) / 2 + 4px); display:block; width:700px; transform-origin:0 50%; }
+.{{ID}}-a { background:var(--c-accent); }
+.{{ID}}-s { background:var(--c-s2); }
+#{{ID}}-ph { position:absolute; left:224px; top:-10px; width:4px; height:124px; background:var(--c-light); }
+#{{ID}}-card { position:absolute; left:70px; top:420px; width:940px; height:820px; border-radius:calc(var(--radius) + 12px); overflow:hidden;
+  background:var(--c-dark); border:2px solid var(--c-hair-dark); box-shadow:0 22px 44px color-mix(in srgb, var(--c-dark) 40%, transparent); }
+#{{ID}}-top { height:58px; display:flex; align-items:center; gap:12px; padding:0 22px; }
+#{{ID}}-top i { width:16px; height:16px; border-radius:50%; background:var(--c-hair-dark); display:block; }
+#{{ID}}-t { margin-left:14px; font-family:var(--font-mono); font-size:26px; letter-spacing:.1em; color:var(--c-muted-dark); }
+#{{ID}}-scr { position:relative; width:940px; height:762px; overflow:hidden; }
+#{{ID}}-v { position:absolute; left:0; top:0; width:940px; height:762px; object-fit:cover; }
+#{{ID}}-ph-chip { position:absolute; left:20px; top:20px; background:var(--c-accent); color:var(--c-light); font-family:var(--font-mono); font-size:26px; padding:8px 14px; }
+</style>

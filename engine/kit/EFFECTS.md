@@ -40,8 +40,14 @@ cut already cleans the voice (noise, EQ, compression, level). `pitch-shift` on s
 sound. Ask first.
 
 ## FX: hand-built moments
-`fx/LIBRARY.md`, contract `kit/FX_BRIEF.md`. Designed moments keyed to words: receipt printer, keycaps, magazine cover, projected film. Copy the
-folder to `<project>/fx/<id>/`, change the constants, add `dict(id=, layer=, at=, end=)` to `FX`. Works in any mode, and a flex edit lives on them.
+`fx/LIBRARY.md`, contract `kit/FX_BRIEF.md`. Designed moments keyed to words: receipt printer, keycaps, magazine cover, projected film. Add
+`dict(id=, layer=, at=, end=)` to `FX` (`like="<folder>"` when the id isn't the folder name): the build copies the library folder into
+`<project>/fx/<id>/` the first time, and you change the constants there. Works in any mode, and a flex edit lives on them.
+
+**Starter pack.** The twenty effects from the "20 Video Effects Created by Claude" reel work with no setup beyond a window on their word:
+`orbit`, `chat-takeover`, `frame-escape`, `snap-zoom`, `checklist-pop`, `headline-storm`, `zoom-portal`, `growth-curve`, `studio-reveal`,
+`broll-overlay`, `paper-cutout`, `dolly-zoom`, `magazine-cover`, `liquid-glass`, `zoom-through`, `green-screen`, `frame-break`, `digital-zoom`,
+`phone-mockup`, `checklist`. The `behind` ones need the cutout and a `CUT_WINDOWS` entry over the window. `examples/effects/edit.py` uses all twenty.
 
 ## What doesn't combine
 - **A look on the footage reaches what's behind the head**, because it's the same layer. A black-and-white moment turns a coloured title grey. Time looks

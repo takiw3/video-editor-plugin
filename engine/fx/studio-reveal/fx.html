@@ -1,0 +1,19 @@
+<!-- studio-reveal: the lights go out behind the speaker, two softbox panels flicker on one after the other, and an
+     ON AIR sign lights in the accent. Flat panels (no glow), behind the head so the speaker stays in front. fx.js. -->
+<div id="{{ID}}-g" data-layout-allow-overlap data-layout-allow-occlusion>
+  <div id="{{ID}}-l" class="{{ID}}-box"><i></i><i></i><i></i></div>
+  <div id="{{ID}}-r" class="{{ID}}-box"><i></i><i></i><i></i></div>
+  <div id="{{ID}}-fl"></div>
+  <div id="{{ID}}-sign" data-layout-allow-overlap>ON AIR</div>
+</div>
+<style>
+#{{ID}}-g { position:absolute; left:0; top:0; width:1080px; height:1920px; background:var(--c-dark); }
+.{{ID}}-box { position:absolute; top:600px; width:300px; height:470px; background:var(--c-light); border:10px solid var(--c-hair-dark); box-sizing:border-box;
+  display:flex; flex-direction:column; justify-content:space-evenly; padding:0 26px; }
+.{{ID}}-box i { display:block; height:3px; background:color-mix(in srgb, var(--c-dark) 12%, transparent); }
+#{{ID}}-l { left:40px; transform:perspective(900px) rotateY(28deg); }
+#{{ID}}-r { left:740px; transform:perspective(900px) rotateY(-28deg); }
+#{{ID}}-fl { position:absolute; left:0; top:1500px; width:1080px; height:420px; background:color-mix(in srgb, var(--c-light) 8%, var(--c-dark)); }
+#{{ID}}-sign { position:absolute; left:390px; top:300px; width:300px; text-align:center; font-family:var(--font-mono); font-size:46px; letter-spacing:.14em;
+  color:var(--c-accent); border:5px solid var(--c-accent); border-radius:var(--radius); padding:10px 0; box-sizing:border-box; }
+</style>
