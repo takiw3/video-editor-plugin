@@ -40,6 +40,13 @@ Ask only what you can't work out, and never more than one thing at a time:
 - **What's it for?** Read it from the transcript first. Ask only when the goal is unclear: grow followers, get comments,
   sell something, teach.
 - **A source?** If they talk about an article, a product or a post, ask for the link. Real screenshots beat anything invented.
+- **B-roll?** If they talk about something on a screen (an app, a site, a dashboard, their files), ask once: "Got screen
+  recordings or clips of <the exact things>? Send them now or later; I'll build with placeholders meanwhile." Never wait
+  on the answer. Public pages (a product's site, a repo, an article) you screenshot yourself with a browser tool.
+- **A reference reel?** If they send or name one, run `VE refs <project>/ref <link or file>` in the background and read its
+  `summary.md` and sheet pages before writing the edit. Borrow its pacing: how long shots last, how often the picture
+  changes, how much of it is full screen, how big the type is. Never copy its words, devices or layout: their format and
+  style win, and the moments are designed for their words.
 
 **Pick the edit.** Recommend from the footage and what they said, say why in a line, and let them change it:
 - **Studio** (`hifi`): produced. Two framings, full-screen data cards, type behind the head. Best for sit-down, 4K and
@@ -62,9 +69,7 @@ Then read the mode file and `<project>/style/STYLE.md`; where they disagree, the
 - Look at two stills of the footage (`VE ffmpeg -ss <t> -i <clip> -frames:v 1 ...`) to check `FACE`, `CAPTION_Y`, `FRAMES`.
   Set `SHOTS`, `HOLD` (studio 0.6, or 1.3 with an end card; selfie 0.04; flex 0.5), `J_LEAD` comes from the pack.
 - `VE cut <project> --plan`: every piece must read its own audio. Then `VE cut <project>` and `VE words <project>`.
-- `VE ffmpeg -y -i <project>/assets/aroll.mp4 -c copy <project>/public/clean.mp4`. If anything goes behind the head, run
-  `VE cutout <project>` in the background now (10 to 25 seconds per second of video on a laptop), and wait for it before the
-  storyboard as above.
+- `VE ffmpeg -y -i <project>/assets/aroll.mp4 -c copy <project>/public/clean.mp4`.
 
 ## 3. Write the edit (edit.py)
 
@@ -90,6 +95,20 @@ video, and every event lands on a word from `words.json`.
 - **The end**: a CTA they actually said, on screen. No end card unless they ask.
 - **Pace** from the pack's `motion`.
 
+**Density: the bar for every mode.** `VE storyboard` prints the count (mark a hand-built effect that fills the frame
+`full=True` so it counts); fix the edit before they see it if it's short:
+- One designed moment per beat: a card, a cutaway, type behind the head, an effect. A beat that is only them talking
+  with captions is a gap.
+- Full-screen moments (cards, `BROLL`, effects over the whole frame) cover about a third of the runtime, 3 to 8 seconds
+  each, captions on top. Selfie keeps them in frame, so there the share goes to type behind and things landing on top.
+- Effects at about 3 to 4 a minute on top of that, from the starter pack by default (they work from their defaults with
+  just a window on the word), each on the word that motivates it. Flex is busier by design.
+
+**Cutout, as soon as the windows are written**: if anything goes behind the head (`CUT_WINDOWS`, or an `FX` that reads the
+cutout), start `VE cutout <project>` in the background now. It only cuts out the moments that use it, about 10 to 20 seconds
+per second of those on a laptop, so it runs alongside step 4 and is done by the storyboard. Move a window later and run it
+again: only the new frames are cut out. `VE build` says when a window isn't covered yet.
+
 **Needs pass, every video, every beat, without being asked.** Sort every asset three ways:
 - *In hand*: the clip, the source, public pages you can screenshot yourself.
 - *Only they have it*: B-roll, their screen, logos, dashboards. Write each into `NEEDS` as `("p06", "Screen recording: 8-10s of
@@ -108,10 +127,13 @@ Skip for a selfie edit with no `FX`.
   grouped by technique. Each prompt gives: KIT, the project, VE, its ids, layers and windows, the words with output times, where
   the head is, the real assets, its sandbox name. Review every still at full size, send fixes back to the same agent, merge
   frames into `FX` and SFX into `SOUND`.
-- **Studio cards**: one `video-editor:card-builder` per card, all at once. Each prompt gives: KIT, PROJECT, VE, the library card to
-  start from, the id and folder, the exact frame count, the window, the spoken words with card times, the data, phase 1 only
-  (still and beats, no render). Review every still at full size: read it top to bottom as a viewer would. It must say the
-  line in order, say nothing twice, and the hero must fill the width. Send anything else back to the same agent.
+- **Studio cards**: one `video-editor:card-builder` per card, all at once, in the background. Each prompt gives: KIT, PROJECT,
+  VE, the library card to start from, the id, the ground, the exact frame count, the window, the spoken words with card
+  times, the data, phase 1 only (still and beats, no render). The agent starts with `VE card`, so the prompt needs no file
+  list. Review every still at full size: read it top to bottom as a viewer would. It must say the line in order, say
+  nothing twice, and the hero must fill the width. Send anything else back to the same agent.
+- Don't sit waiting on agents: write sound (step 5) and check the density while they work, and review each one as it
+  reports.
 - No subagents: build them one at a time from the same brief.
 
 ## 5. Sound
@@ -129,7 +151,10 @@ licensed: `SOUND.music`. `VE mix <project>`.
   `files.json` and `capabilities` = `{"comments": {"composer_only": true}}`. Republish later versions from the same path. Otherwise
   run `VE serve <project>` in the background and give them the address: they leave a note on any beat and press "Looks good: render it".
 - In the same message: what you need from them (each item, its beat, exactly what to send) or "nothing needed from you", then
-  anything a generator made. Then STOP. Nothing renders until they say go.
+  anything a generator made. Then STOP. The video doesn't render until they say go.
+- Just before you stop, start every card's render in the background: `VE card <project> <id> --render`, one per card.
+  Cards are short (seconds each), so they're done by the time they say go. A note that changes a card goes back to its
+  agent and that card renders again; the others stay as they are.
 
 ## 7. Notes
 
@@ -139,7 +164,7 @@ version. When they send an asset, drop it in and clear it from `NEEDS`.
 
 ## 8. Render and deliver (after "go")
 
-- Card agents render their mp4s (phase 2).
+- Cards: already rendered from step 6. Any card a note changed renders again (`VE card <project> <id> --render`).
 - `VE render <project> <slug>-v1`: builds, renders, then checks cuts, lip sync, loudness and flashes. Plan on 3 to 10 minutes per
   minute of video, longer with a lot of effects. Tell them how long, then wait for it as above. Look at every cut sheet it writes: no flash frame, no wrong frame, no doubled head.
 - A pass copies the video and a phone copy next to their original clip as `<Title> v1.mp4` and `<Title> v1 (phone).mp4`.

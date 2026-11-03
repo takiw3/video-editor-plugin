@@ -10,6 +10,7 @@
     ve mix <project>                                            voice, sound effects, music
     ve build <project> [--stills] [--safe]                      write the composition
     ve transitions <project>                                    pre-render edit.TRANSITIONS
+    ve card <project> <id> --from <card> --frames N --ground G  start a card (then --look <seconds>, --render)
     ve storyboard <project> [--version N] [--list]              the page to review before rendering
     ve serve <project or folder> [--port N]                     review that page locally
     ve render <project> [name]                                  build, render, QA, deliver
@@ -37,7 +38,7 @@ KIT = os.path.dirname(HERE)
 SCRIPTS = {
     "new": "pipeline/new.py", "probe": "pipeline/ingest.py", "autocut": "pipeline/autocut.py", "cut": "pipeline/cut.py",
     "words": "pipeline/words.py", "cutout": "pipeline/cutout.py", "matte": "pipeline/matte.py", "mix": "pipeline/mix.py",
-    "build": "pipeline/build.py", "transitions": "pipeline/transitions.py", "storyboard": "pipeline/storyboard.py",
+    "build": "pipeline/build.py", "card": "pipeline/card.py", "transitions": "pipeline/transitions.py", "storyboard": "pipeline/storyboard.py",
     "serve": "storyboard/serve.py", "render": "pipeline/render.py", "qa": "pipeline/qa.py", "export": "pipeline/export.py",
     "post": "pipeline/postpack.py", "effects": "pipeline/effects.py", "style": "pipeline/presets.py",
     "board": "onboarding/board.py", "refs": "onboarding/refs.py", "fxsandbox": "pipeline/fxsandbox.py",

@@ -2,6 +2,21 @@
 
 Your style, your projects and your finished videos live in `~/video-editor/`, outside the plugin, so an update never touches them.
 
+## 1.3.0
+Faster edits, and fuller ones.
+- The cutout (you, cut out so type can sit behind your head) only does the moments that use it, and runs while the
+  cards are built instead of holding up the storyboard. On a 66-second video: 3.6 minutes instead of 17. Move a
+  moment later and only its new frames are done. The rest of the file is see-through, so every effect lines up as before.
+- The cut is about twice as fast and a little sharper: one compression step instead of two.
+- The checks after a render run all at once.
+- Cards start from one command that sets up the folder, so the card builders spend their time on the card. They
+  render while you look at the storyboard, so "go" goes straight to the final render.
+- Every edit is held to a fuller bar: a designed moment on every beat, about a third of the video full screen (cards,
+  your clips, effects that fill the frame), and 3 to 4 effects a minute from the starter pack. The storyboard counts it.
+- Claude asks once for screen recordings of what you talk about and screenshots public pages itself.
+- Send a reel you like and the edit borrows its pacing: how long shots last, how often the picture changes, how
+  much is full screen. It never copies its words or look.
+
 ## 1.2.1
 Fixes from setting up a real brand's style.
 - The style board shows your caption preset the way your videos get it: its size, outline and rhythm. Before, its

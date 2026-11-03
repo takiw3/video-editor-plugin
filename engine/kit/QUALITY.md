@@ -6,6 +6,7 @@ A technically correct edit can still look cheap. Small, static, timid graphics a
 - **Depth.** The big things go behind the head, where the head breaks them. That overlap reads as produced. Things on top are things you'd touch: a prompt bar, a comment, a card.
 - **A camera.** Open on a small move, punch in on the lines that matter, push slowly while type stands still behind them. A locked camera reads as a screen recording.
 - **One designed moment per beat.** A cover with a masthead and a barcode beats a chip and a strip. One idea, readable in a second or two.
+- **Enough of it.** Full-screen moments (cards, cutaways, effects over the whole frame) cover about a third of the runtime, 3 to 8 seconds each, with effects at 3 to 4 a minute on top. A beat that is only a talking head with captions is a gap.
 - **The edit does what the words say.** "It warms up" warms the picture. "Huge" goes huge. An effect with no reason in the words is noise.
 - **Their words.** Hook type is the sentence they say, on frame 0, in step with their voice.
 - **Real things first.** Their screen, their files, the actual article. Anything invented is labelled "Sample".

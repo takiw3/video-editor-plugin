@@ -40,6 +40,11 @@ def main():
     for f in ("clean.mp4", "master.wav"):
         if not os.path.exists(os.path.join(pub, f)):
             sys.exit(f"public/{f} missing (clean.mp4 = assets/aroll.mp4; master.wav from mix.py)")
+    from cutout import missing as uncut
+    gaps = uncut(project, E)
+    if gaps:
+        sys.exit("the cutout doesn't cover " + ", ".join(f"{a:.2f}-{b:.2f}s" for a, b in gaps) +
+                 f": run ve cutout {project} first (only the new frames are cut out)")
     if getattr(E, "TRANSITIONS", None):
         subprocess.run([PY, os.path.join(HERE, "transitions.py"), project], check=True)
     subprocess.run([PY, os.path.join(HERE, "build.py"), project], check=True)

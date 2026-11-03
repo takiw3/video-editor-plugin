@@ -188,16 +188,112 @@ class LongSteps(unittest.TestCase):
                 os.makedirs(os.path.join(d, sub))
             subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i", "testsrc=size=64x64:rate=30", "-frames:v", "12",
                             os.path.join(d, "assets", "aroll.mp4")], check=True)
-            fake = ["sh", "-c", "sleep 0.3; cp assets/aroll.mp4 assets/subject.webm", "remove-background"]
+            fake = ["sh", "-c", 'sleep 0.3; ffmpeg -v error -y -i "$2" -c:v prores_ks -profile:v 4444 -pix_fmt yuva444p10le "$4"',
+                    "remove-background"]
             old = (cutout.HF, cutout.PROGRESS_EVERY, sys.argv)
             try:
-                cutout.HF, cutout.PROGRESS_EVERY, sys.argv = fake, 0, ["cutout.py", d]
+                cutout.HF, cutout.PROGRESS_EVERY, sys.argv = fake, 0, ["cutout.py", d, "--all"]
                 cutout.main()
                 self.assertTrue(os.path.exists(os.path.join(d, "public", "subject.webm")))
                 cutout.HF = ["false"]                                  # a second call must not run it again
                 cutout.main()
             finally:
                 cutout.HF, cutout.PROGRESS_EVERY, sys.argv = old
+
+
+def alpha(f, n):
+    out = subprocess.run(["ffmpeg", "-v", "error", "-c:v", "libvpx-vp9", "-i", f, "-vf", f"select=eq(n\\,{n})", "-frames:v",
+                          "1", "-f", "rawvideo", "-pix_fmt", "rgba", "-"], capture_output=True, check=True).stdout
+    return max(out[3::4])
+
+
+class Cutout(unittest.TestCase):
+    """only the moments that use it are cut out; the file stays frame for frame with the cut"""
+    def test_ranges(self):
+        import cutout
+        self.assertEqual(cutout.merge([[10, 20], [25, 30], [60, 70]], gap=5), [[10, 30], [60, 70]])
+        self.assertEqual(cutout.subtract([[0, 100]], [[10, 20], [50, 60]]), [[0, 9], [21, 49], [61, 100]])
+        self.assertEqual(cutout.subtract([[10, 20]], [[0, 30]]), [])
+
+    def test_windows_then_only_the_new_frames(self):
+        import cutout
+        with tempfile.TemporaryDirectory() as d:
+            for sub in ("assets", "public"):
+                os.makedirs(os.path.join(d, sub))
+            subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i", "testsrc=size=64x64:rate=30", "-frames:v", "90",
+                            os.path.join(d, "assets", "aroll.mp4")], check=True)
+            open(os.path.join(d, "edit.py"), "w").write("CUT_WINDOWS = [(1.0, 1.2)]\n")
+            log = os.path.join(d, "calls")
+            fake = ["sh", "-c", f'echo "$2" >> {log}; ffmpeg -v error -y -i "$2" -c:v prores_ks -profile:v 4444 '
+                                '-pix_fmt yuva444p10le "$4"', "remove-background"]
+            old = (cutout.HF, cutout.PROGRESS_EVERY, sys.argv)
+            try:
+                cutout.HF, cutout.PROGRESS_EVERY, sys.argv = fake, 0, ["cutout.py", d]
+                cutout.main()
+                sub = os.path.join(d, "public", "subject.webm")
+                self.assertEqual(cutout.frames(sub), "90")
+                self.assertEqual(alpha(sub, 5), 0)                      # outside the window: transparent
+                self.assertEqual(alpha(sub, 33), 255)                   # inside: the subject
+                self.assertAlmostEqual(cutout.last_time(sub), 89 / 30, delta=0.002)
+                E = cutout.load_edit(d)
+                self.assertEqual(cutout.missing(d, E), [])
+                cutout.main()                                           # same windows: nothing to do
+                self.assertEqual(len(open(log).read().split()), 1)
+                open(os.path.join(d, "edit.py"), "w").write("CUT_WINDOWS = [(1.0, 1.2), (2.4, 2.6)]\n")
+                self.assertEqual(len(cutout.missing(d, cutout.load_edit(d))), 1)
+                cutout.main()                                           # a new window: only its frames
+                self.assertEqual(len(open(log).read().split()), 2)
+                key = json.load(open(os.path.join(d, "assets", "subject.key")))
+                self.assertEqual([r[:2] for r in key["parts"][1]["ranges"]], [[52, 89]])   # joined to the first: under a second apart
+                self.assertEqual(alpha(sub, 75), 255)
+                self.assertEqual(alpha(sub, 33), 255)                   # the first window is still there
+                self.assertEqual(cutout.frames(sub), "90")
+            finally:
+                cutout.HF, cutout.PROGRESS_EVERY, sys.argv = old
+
+
+class Card(unittest.TestCase):
+    def test_scaffold(self):
+        card = os.path.join(ENG, "pipeline", "card.py")
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "style", "fonts"))
+            open(os.path.join(d, "style", "brand.css"), "w").write(":root{}")
+            os.makedirs(os.path.join(d, "public", "vendor"))
+            open(os.path.join(d, "public", "vendor", "gsap.min.js"), "w").write("")
+            r = subprocess.run([sys.executable, card, d, "c1", "--from", "pie", "--frames", "90", "--ground", "light"],
+                               capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            c = os.path.join(d, "cards", "c1")
+            for f in ("index.html", "brand.css", "card.css", "hyperframes.json", "vendor/gsap.min.js"):
+                self.assertTrue(os.path.exists(os.path.join(c, f)), f)
+            root = re.search(r'<div id="root"[^>]*>', open(os.path.join(c, "index.html")).read()).group(0)
+            self.assertIn('data-duration="3.0000"', root)
+            self.assertIn('class="ground-light"', root)
+            r = subprocess.run([sys.executable, card, d, "c3", "--from", "pie", "--frames", "305"], capture_output=True, text=True)
+            root = re.search(r'<div id="root"[^>]*>', open(os.path.join(d, "cards", "c3", "index.html")).read()).group(0)
+            self.assertIn('data-duration="10.1666"', root)              # rounded down: 10.167 renders 306 frames
+            self.assertIn('class="ground-dark"', root)                  # no --ground: the library card's own
+            r = subprocess.run([sys.executable, card, d, "c1", "--from", "pie", "--frames", "90"], capture_output=True, text=True)
+            self.assertNotEqual(r.returncode, 0)                        # an agent's card is never overwritten
+            r = subprocess.run([sys.executable, card, d, "c2", "--from", "nope", "--frames", "9"], capture_output=True, text=True)
+            self.assertNotEqual(r.returncode, 0)
+            self.assertFalse(os.path.exists(os.path.join(d, "cards", "c2")))
+
+
+class Density(unittest.TestCase):
+    def test_count(self):
+        import storyboard
+        from types import SimpleNamespace
+        E = SimpleNamespace(TOTAL=60.0, END_IN=60.0, END_CARD=None, TRANSITIONS=[],
+                            CARDS=[("c1", "cards/c1.mp4", 10.0, 15.0, "dark")], BROLL=[dict(at=12.0, end=18.0)],
+                            FX=[dict(id="a", at=30.0, end=35.0, full=True), dict(id="b", at=40.0, end=42.0)],
+                            FXLIB=[dict(effect="x", at=1.0), dict(effect="y", at=2.0)])
+        ps = [dict(id="p01", kind="footage", moves=[]), dict(id="p02", kind="footage", moves=["Punch-in on the cut."]),
+              dict(id="p03", kind="footage", moves=["Something lands."]), dict(id="p04", kind="dark", moves=[])]
+        share, per_min, bare = storyboard.density(E, ps)
+        self.assertAlmostEqual(share, 13 / 60)                         # 10-18 (card and cutaway overlap) + 30-35
+        self.assertAlmostEqual(per_min, 4.0)
+        self.assertEqual(bare, ["p01", "p02"])
 
 
 class StarterPack(unittest.TestCase):

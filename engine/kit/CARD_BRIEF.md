@@ -12,9 +12,11 @@ KIT is this repo. PROJECT is the video's folder (your prompt gives both). Every 
   theirs wins); start from the closest one when your prompt names it.
 - `KIT/kit/template.html`: a working skeleton with `q()`, `tok()`, `draw()` and `count()`.
 
-Start: make your folder `PROJECT/cards/<id>/` and copy into it the library card you start from (if any), then
-`PROJECT/style/brand.css`, `PROJECT/style/fonts/`, `KIT/kit/card.css`, `PROJECT/public/vendor/` (GSAP),
-`KIT/kit/hyperframes.json`.
+Start: `ve card PROJECT <id> --from <library card> --frames N --ground light|dark` makes `PROJECT/cards/<id>/` with
+the library card, the style pack, card.css, GSAP and hyperframes.json, `data-duration` and the ground already set, and
+lists the card's element ids. Then change the data, labels and beat times in its `index.html`. No library card fits:
+leave out `--from` and it starts from the template. You only need `TOKENS.md` or `card.css` when the card needs a
+token or device its starting card doesn't use.
 Never edit KIT, the style pack, or other cards.
 
 ## Style rules (hard)
@@ -58,14 +60,12 @@ Never edit KIT, the style pack, or other cards.
   `immediateRender:false`; hidden initial states via `gsap.set` outside the timeline.
 - No apostrophes in ids, no `<br>` in text.
 
-## Commands (inside your card folder)
-- Lint: `ve hf check` (0 errors).
-- Snapshots: `ve hf snapshot --at <t1,t2,...> --no-end --describe false`.
-- Render: `ve hf render -q delivery --quiet -o <id>.mp4`, then
-  `ve ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_read_frames,width,height,r_frame_rate -of csv=p=0 <id>.mp4`
-  must report 1080,1920,30/1 and your exact frame count.
-- Look at your own work: frames at every beat tiled into a contact sheet, judged like a senior motion designer;
-  one frame with `class="debug"` on #root to prove the caption band is empty (remove it before rendering).
+## Commands
+- Look: `ve card PROJECT <id> --look <t1,t2,...>` (your beat seconds) lints, takes a still at each, writes
+  `still.jpg` (the final frame) and `sheet.jpg` (every still in a row), and says whether anything sits in the caption
+  band. Read both images like a senior motion designer and fix what's off; one or two rounds, not more.
+- Render: `ve card PROJECT <id> --render` renders `<id>.mp4` and checks 1080x1920, 30fps and your exact frame count.
+- Anything else in the card folder: `ve hf ...` (the pinned HyperFrames CLI).
 
 ## Two phases
 1. **Storyboard**: build the card, then save `still.jpg` (the final state, 1080x1920) and report its beats. Stop

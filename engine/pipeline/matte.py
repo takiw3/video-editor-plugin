@@ -90,6 +90,8 @@ def main():
         import shutil
         shutil.copy(out, os.path.join(project, "public", "subject.webm"))
         print(f"aroll frames {n} / matte frames {frames(project)}")
+        import cutout                                   # the whole video is covered: build and render can tell
+        cutout.write_key(project, {"aroll": cutout.stamp(project), "whole": True, "parts": []})
 
 
 if __name__ == "__main__":

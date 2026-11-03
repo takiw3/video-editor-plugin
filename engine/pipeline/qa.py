@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""QA a render. Nothing ships until all three pass.
+"""QA a render. Nothing ships until all of these pass. They run at the same time, each on its own decode.
   1. cuts: the last frame before and the first frame after every visual change (picture cuts, reframes, card in/out,
      end card), tiled 8 pairs per sheet into work/qa/cuts_<n>.jpg. Read them: no flash, no wrong frame, no doubled head.
   2. lip sync: for samples across every stretch where the speaker is on screen, the rendered frame is matched against
@@ -35,13 +35,18 @@ def cut_sheets(project, render, E, TL):
     frames = sorted({round(t * FPS) for t in events if 0 < t < E.TOTAL})
     out = os.path.join(project, "work", "qa")
     os.makedirs(out, exist_ok=True)
-    pngs = []
-    for f in frames:
-        for n in (f - 1, f):
-            p = os.path.join(out, f"f{n}.png")
-            subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", render, "-vf", f"select=eq(n\\,{n}),scale={320 if wide(E) else 180}:-2",
-                            "-frames:v", "1", p], check=True)
-            pngs.append(p)
+    want = sorted({n for f in frames for n in (f - 1, f)})
+    if not want:
+        return []
+    for old in os.listdir(out):
+        if old.startswith("f") and old.endswith(".png"):
+            os.remove(os.path.join(out, old))
+    sel = "+".join(f"eq(n\\,{n})" for n in want)             # every frame in one decode, in order
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", render, "-vf",
+                    f"select='{sel}',scale={320 if wide(E) else 180}:-2", "-fps_mode", "passthrough",
+                    os.path.join(out, "f%05d.png")], check=True)
+    got = {n: os.path.join(out, f"f{k + 1:05d}.png") for k, n in enumerate(want)}
+    pngs = [got[n] for f in frames for n in (f - 1, f)]
     sheets = []
     for r, row in enumerate([pngs[i:i + 16] for i in range(0, len(pngs), 16)]):
         ins = sum((["-i", p] for p in row), [])
@@ -140,38 +145,49 @@ def loudness(render):
     return i, pk
 
 
+def phone_copy(render, E):
+    ph = os.path.splitext(render)[0] + "-phone.mp4"
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", render, "-vf", f"scale={1920 if wide(E) else 1080}:-2", "-c:v", "libx264", "-crf", "23",
+                    "-preset", "medium", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", ph], check=True)
+    return ph
+
+
 def main():
     project = project_arg()
     render = os.path.join(project, sys.argv[2]) if not os.path.isabs(sys.argv[2]) else sys.argv[2]
     E = load_edit(project)
     TL = timeline(project)
     B.setup(E, TL)
+    import flash
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(5) as ex:              # every check at once, each on its own decode; printed in order below
+        jobs = dict(cuts=ex.submit(cut_sheets, project, render, E, TL), sync=ex.submit(lip_sync, render, E, TL),
+                    loud=ex.submit(loudness, render), flash=ex.submit(flash.check, render))
+        if "--phone" in sys.argv:
+            jobs["phone"] = ex.submit(phone_copy, render, E)
+        R = {k: f.result() for k, f in jobs.items()}
     ok = True
-    for sheet, fr in cut_sheets(project, render, E, TL):
+    for sheet, fr in R["cuts"]:
         print("cuts:", sheet, fr)
     worst = 0.0
-    for t, d, c, note in lip_sync(render, E, TL):
+    for t, d, c, note in R["sync"]:
         flag = note or ("" if abs(d) <= 2.5 / FPS else "   <-- OUT OF SYNC")
         if not note:
             worst = max(worst, abs(d))
         print(f"sync: reel {t:6.2f}s  offset {d:+.3f}s  match {c:.3f}  {flag}")
     if worst > 2.5 / FPS:           # +-2 frames is measurement noise (grades, overlays); a real slip is many frames
         ok = False
-    i, pk = loudness(render)
+    i, pk = R["loud"]
     print(f"loudness: {i} LUFS, peak {pk} dBFS")
     if abs(i + 14) > 0.5 or pk > -1.0:
         ok = False
         print("loudness OUT OF SPEC")
-    import flash
-    f = flash.check(render)
+    f = R["flash"]
     print(f"flashes: {f['verdict']}: {f['text']}")
     if f["verdict"] == "fail":
         ok = False
-    if "--phone" in sys.argv:
-        ph = os.path.splitext(render)[0] + "-phone.mp4"
-        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", render, "-vf", f"scale={1920 if wide(E) else 1080}:-2", "-c:v", "libx264", "-crf", "23",
-                        "-preset", "medium", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", ph], check=True)
-        print("phone copy", ph, f"{os.path.getsize(ph) / 1e6:.1f} MB")
+    if "phone" in R:
+        print("phone copy", R["phone"], f"{os.path.getsize(R['phone']) / 1e6:.1f} MB")
     print("QA PASS (now read the cut sheets)" if ok else "QA FAIL")
     sys.exit(0 if ok else 1)
 

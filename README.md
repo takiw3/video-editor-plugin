@@ -79,7 +79,7 @@ It won't post for you, write your script, promise views, copy someone else's vid
 
 ## How long it takes
 
-On an M2 MacBook, a minute of finished video took about 3 minutes to render with no effects, and about 10 with effects and things behind your head, plus the cutout. Close other heavy apps while it renders.
+On an M2 MacBook, a minute of finished video took about 3 minutes to render with no effects, and about 10 with effects and things behind your head. The cutout for things behind your head only does the moments that use it (a few minutes) and runs while the cards are built. Close other heavy apps while it renders.
 
 ## Removing it
 

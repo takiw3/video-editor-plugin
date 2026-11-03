@@ -43,6 +43,8 @@ sound. Ask first.
 `fx/LIBRARY.md`, contract `kit/FX_BRIEF.md`. Designed moments keyed to words: receipt printer, keycaps, magazine cover, projected film. Add
 `dict(id=, layer=, at=, end=)` to `FX` (`like="<folder>"` when the id isn't the folder name): the build copies the library folder into
 `<project>/fx/<id>/` the first time, and you change the constants there. Works in any mode, and a flex edit lives on them.
+`full=True` on an entry that fills the frame (a chat takeover, a phone mockup, a studio reveal) counts it as full screen
+in the storyboard's density line.
 
 **Starter pack.** The twenty effects from the "20 Video Effects Created by Claude" reel work with no setup beyond a window on their word:
 `orbit`, `chat-takeover`, `frame-escape`, `snap-zoom`, `checklist-pop`, `headline-storm`, `zoom-portal`, `growth-curve`, `studio-reveal`,

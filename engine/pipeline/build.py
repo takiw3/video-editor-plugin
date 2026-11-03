@@ -24,6 +24,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import KIT, clip_start, load_edit, project_arg, q, timeline, wide  # noqa: E402
+import cutout  # noqa: E402
 import style as ST  # noqa: E402
 
 NL = "\n"
@@ -948,6 +949,10 @@ def main():
     have = [c[0] for c in E.CARDS if os.path.exists(os.path.join(pub, c[1]))]
     missing = [c[0] for c in E.CARDS if c[0] not in have]
     print(f"wrote {pub}/index.html  {E.TOTAL:.3f}s  cards ready: {have}  missing: {missing or 'none'}")
+    gaps = cutout.missing(project, E)
+    if gaps:
+        print("the cutout doesn't cover " + ", ".join(f"{a:.2f}-{b:.2f}s" for a, b in gaps) + " yet: the speaker "
+              f"won't be in front there. Run ve cutout {project} (only the new frames are cut out)")
 
 
 if __name__ == "__main__":

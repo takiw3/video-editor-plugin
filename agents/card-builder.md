@@ -9,9 +9,11 @@ the library card to start from, the frame count, the window, the spoken words wi
 which phase to do.
 
 1. Read `KIT/kit/CARD_BRIEF.md` first. It is your contract: follow it exactly, including what you never touch.
-2. Then `PROJECT/style/STYLE.md` (its Hi-fi section) and the library card your prompt names.
-3. Use `VE hf ...` wherever the brief says `ve hf`, and `VE py <script>` for helper scripts. ffmpeg and ffprobe: `VE ffmpeg`,
-   `VE ffprobe`.
-4. Do only the phase your prompt names (phase 1: still.jpg and beats, no render) and report what the brief asks for.
-5. Before you report, look at your still at full size and read it top to bottom. If it doesn't say the line in order, says
-   something twice, or the hero is smaller than the brief's layout rules allow, fix it first.
+2. Then the Hi-fi section of `PROJECT/style/STYLE.md`. Start the card with `VE card PROJECT <id> --from <library card>
+   --frames N --ground <ground>` and read the `index.html` it copied in: that's your starting point, not the docs.
+3. Use `VE` wherever the brief says `ve` (`VE card`, `VE hf ...`, `VE ffmpeg`, `VE py <script>`).
+4. Do only the phase your prompt names (phase 1: still.jpg and beats, no render; phase 2: notes, then `VE card PROJECT
+   <id> --render`) and report what the brief asks for.
+5. Before you report, run `VE card PROJECT <id> --look <beats>` and read `sheet.jpg` and `still.jpg` top to bottom. If it
+   doesn't say the line in order, says something twice, or the hero is smaller than the brief's layout rules allow, fix
+   it first.

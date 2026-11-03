@@ -206,6 +206,23 @@ def describe(E, TL, a, b, words):
                 sound=", ".join(sounds), marks=marks, frames=frames)
 
 
+def density(E, ps):
+    """what kit/QUALITY.md counts: the share of the runtime that's full screen (cards, BROLL, the end card, and FX marked
+    full=True), effects a minute (FX, FXLIB, TRANSITIONS), and the beats with nothing designed in them"""
+    spans = [(c[2], c[3]) for c in E.CARDS] + [(x["at"], B.T(E, x["end"])) for x in getattr(E, "BROLL", [])]
+    spans += [(F["at"], B.T(E, F["end"])) for F in getattr(E, "FX", []) if F.get("full")]
+    if E.END_CARD:
+        spans.append((E.END_IN, E.TOTAL))
+    full, cur = 0.0, 0.0
+    for a, b in sorted(spans):
+        a = max(a, cur)
+        if b > a:
+            full, cur = full + b - a, b
+    n = len(getattr(E, "FX", [])) + len(getattr(E, "FXLIB", [])) + len(getattr(E, "TRANSITIONS", []))
+    bare = [p["id"] for p in ps if p["kind"] == "footage" and all(m.startswith("Punch-in") for m in p["moves"])]
+    return full / E.TOTAL, n / (E.TOTAL / 60), bare
+
+
 KIND_LABEL = {"footage": "you on camera", "light": "light card", "dark": "dark card", "end": "end card"}
 
 
@@ -282,6 +299,10 @@ def main():
     E = load_edit(project)
     TL = timeline(project)
     B.setup(E, TL)
+    gaps = B.cutout.missing(project, E)
+    if gaps and "--list" not in sys.argv:
+        print("note: the cutout doesn't cover " + ", ".join(f"{a:.2f}-{b:.2f}s" for a, b in gaps) + " yet, so those "
+              "frames show the type over the speaker. Run ve cutout, then this again with the same --version")
     words = json.load(open(os.path.join(project, "words.json")))
     version = int(sys.argv[sys.argv.index("--version") + 1]) if "--version" in sys.argv else 1
     ps = []
@@ -295,6 +316,9 @@ def main():
         for p in ps:
             print(f"  {p['id']} {p['tc0']}-{p['tc1']} {p['label']:<34} {p['line'][:70]}")
         return
+    share, per_min, bare = density(E, ps)
+    print(f"density: full screen {share:.0%} of the runtime (bar: about a third), {per_min:.1f} effects a minute "
+          f"(bar: 3 to 4), beats with only a talking head: {', '.join(bare) or 'none'}")
     ids = {p["id"] for p in ps}
     stray = [bid for bid, _ in list(E.NEEDS) + list(E.GENERATED) if bid not in ids]
     if stray:

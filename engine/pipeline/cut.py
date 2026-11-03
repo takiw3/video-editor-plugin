@@ -137,18 +137,21 @@ def main():
     os.makedirs(assets, exist_ok=True)
     os.makedirs(work, exist_ok=True)
 
-    # ---- picture: every piece cut straight from the 4K original, exact frame counts
-    parts = []
-    for k, (a, b, src, fr) in enumerate(pcs):
+    # ---- picture: every piece cut straight from the 4K original, exact frame counts. The pieces are lossless and
+    # cut several at once, so the one encode below is the only loss (5x faster than a CRF 12 piece, and sharper)
+    def piece(k, a, b, src, fr):
         n = round((b - a) * FPS)
         w, h, x, y = E.FRAMES[fr]
         W, H = E.CANVAS
         out = os.path.join(work, f"pic_{k:02d}.mp4")
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{src - 0.3 / FPS:.4f}", "-i", E.SRC, "-an",   # a third of a frame early: lands ON the frame, not one late
                         "-vf", f"crop={w}:{h}:{x}:{y},scale={W}:{H}:flags=lanczos,fps={FPS},setsar=1",
-                        "-frames:v", str(n), "-c:v", "libx264", "-crf", "12", "-preset", "medium",
+                        "-frames:v", str(n), "-c:v", "libx264", "-qp", "0", "-preset", "ultrafast",
                         "-pix_fmt", "yuv420p", out], check=True)
-        parts.append(out)
+        return out
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(3) as ex:
+        parts = list(ex.map(lambda kp: piece(kp[0], *kp[1]), enumerate(pcs)))
     concat = os.path.join(work, "pic_concat.txt")
     with open(concat, "w") as fh:
         fh.write("".join(f"file '{os.path.basename(p)}'\n" for p in parts))
@@ -156,6 +159,8 @@ def main():
                     "-vf", f"setpts=N/{FPS}/TB", "-r", str(FPS), "-fps_mode", "cfr",
                     "-c:v", "libx264", "-crf", "14", "-preset", "medium", "-g", "10", "-keyint_min", "10",
                     "-pix_fmt", "yuv420p", "-movflags", "+faststart", os.path.join(assets, "aroll.mp4")], check=True)
+    for p in parts:                                     # lossless pieces are big: about 1 GB a minute
+        os.remove(p)
 
     # ---- voice: keep ranges with 20-30ms fades at each join, then the voice chain
     fc, n = "", len(segs)
