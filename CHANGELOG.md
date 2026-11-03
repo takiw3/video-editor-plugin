@@ -2,6 +2,15 @@
 
 Your style, your projects and your finished videos live in `~/video-editor/`, outside the plugin, so an update never touches them.
 
+## 1.2.1
+Fixes from setting up a real brand's style.
+- The style board shows your caption preset the way your videos get it: its size, outline and rhythm. Before, its
+  sample captions ignored the preset, and with `one-word` the showcase caption ran off both sides of the frame.
+- Captions take your brand's light and dark, never pure white or black, so brands that ban them stay on-brand.
+- `bold-outline` and `one-word` use your caption font's own weight, the one setup downloads, instead of a 900 most
+  fonts weren't downloaded in.
+- No more Pillow warning while setup builds the board.
+
 ## 1.2.0
 The starter pack: the twenty effects from the "20 Video Effects Created by Claude" reel now come built in, so a new
 edit can look good from the first try.

@@ -61,7 +61,8 @@ def pack_css(E):
            f"{'text-transform:uppercase;' if hf.get('uppercase') else ''} }}",
            f".kw {{ top:{lf.get('y', 1318)}px; }} .kc {{ font-size:{lf.get('size', 66)}px; "
            f"{'text-transform:uppercase;' if lf.get('uppercase') else ''} }}"]
-    shadow = "text-shadow:0 2px 14px rgba(0,0,0,.6), 0 0 2px rgba(0,0,0,.5);"
+    shadow = ("text-shadow:0 2px 14px color-mix(in srgb, var(--c-dark) 60%, transparent),"
+              " 0 0 2px color-mix(in srgb, var(--c-dark) 50%, transparent);")
     if not hf.get("box", True):
         css.append(f".cap.onfoot {{ background:none; {shadow} }}")
     if not lf.get("box", True):
@@ -122,11 +123,8 @@ def captions(E):
 
 def karaoke_lines(E):
     """lofi: words.json grouped into one-line phrases; break on punctuation, pauses, max words or characters"""
-    M = getattr(E, "MODE", {})
-    pack = {k: M[k] for k in ("max_words", "max_chars") if k in M}
-    if M.get("captions") == "single":                                  # one word at a time
-        pack.update(max_words=1)
-    K = {**dict(max_words=4, max_chars=24, gap=0.35, huge=[], huge_words=2, huge_chars=12), **pack, **getattr(E, "KARAOKE", {})}
+    mw, mc = caption_rhythm(E)
+    K = {**dict(gap=0.35, huge=[], huge_words=2, huge_chars=12), **getattr(E, "KARAOKE", {}), "max_words": mw, "max_chars": mc}
     big = lambda w: any(a <= w["start"] < b for a, b in K["huge"])     # noqa: E731  ("captions come in huge")
     wins = getattr(E, "WINDOWS", [])
     ground = lambda t: next((g for a, b, g in wins if a - 1e-6 <= t < b - 1e-6), "foot")   # noqa: E731
@@ -155,23 +153,41 @@ def caption_preset(E):
     return getattr(E, "CAPTION_STYLE", None) or E.S["captions"].get("preset") or "karaoke-box"
 
 
-# (css, max_words, max_chars, mode). Every colour is a token from the pack. kit/CAPTIONS.md shows when to use each.
+def caption_rhythm(E):
+    """(max words, max characters) in a caption line: edit.KARAOKE, else the preset's, else the mode's (captions
+    "single" is one word at a time), else 4 and 24. The board cuts its samples with it too"""
+    M = getattr(E, "MODE", {})
+    K = {**dict(max_words=4, max_chars=24), **{k: M[k] for k in ("max_words", "max_chars") if k in M}}
+    if M.get("captions") == "single":
+        K["max_words"] = 1
+    _, pw, pc, _ = CAPTION_PRESETS.get(caption_preset(E), ("", None, None, ""))
+    if pw:
+        K.update(max_words=pw, max_chars=pc)
+    K.update({k: v for k, v in getattr(E, "KARAOKE", {}).items() if k in K})
+    return K["max_words"], K["max_chars"]
+
+
+# (css, max_words, max_chars, mode). Every colour is a token from the pack, never #fff or #000 (some brands ban pure
+# white and black), and the heavy presets use the pack's caption weight, which setup downloads. Each preset sets its own
+# size: max_chars is what fits the frame at that size. kit/CAPTIONS.md shows when to use each.
 CAPTION_PRESETS = {
     "karaoke-box": ("", None, None, "light"),
     "phrase-box": ("", 4, 26, "phrase"),
     "bold-outline": (
-        ".kc { background:none; padding:0 12px; font-weight:900; text-transform:uppercase; letter-spacing:0; font-size:82px; color:#fff;"
-        " -webkit-text-stroke:10px #000; paint-order:stroke fill; text-shadow:0 6px 0 #000; }"
+        ".kc { background:none; padding:0 12px; font-weight:var(--caption-weight); text-transform:uppercase; letter-spacing:0; font-size:82px;"
+        " color:var(--c-box-ink); -webkit-text-stroke:10px var(--c-dark); paint-order:stroke fill; text-shadow:0 6px 0 var(--c-dark); }"
         " .kc .k.on { color:var(--c-accent); }", 3, 18, "accent"),
     "one-word": (
-        ".kc { background:none; padding:0 12px; font-weight:900; font-size:128px; letter-spacing:-.01em; color:#fff;"
-        " -webkit-text-stroke:12px #000; paint-order:stroke fill; }", 1, 16, "pop"),
+        ".kc { background:none; padding:0 12px; font-weight:var(--caption-weight); font-size:128px; letter-spacing:-.01em;"
+        " color:var(--c-box-ink); -webkit-text-stroke:12px var(--c-dark); paint-order:stroke fill; }", 1, 16, "pop"),
     "active-pill": (
-        ".kc { background:none; padding:0; font-weight:800; font-size:70px; color:#fff; text-shadow:0 3px 16px rgba(0,0,0,.65); }"
+        ".kc { background:none; padding:0; font-weight:800; font-size:70px; color:var(--c-box-ink);"
+        " text-shadow:0 3px 16px color-mix(in srgb, var(--c-dark) 65%, transparent); }"
         " .kc .k { padding:0 12px 4px; border-radius:calc(var(--radius) + 6px); display:inline-block; }"
-        " .kc .k.on { background:var(--c-accent); color:#fff; text-shadow:none; }", 4, 24, "accent"),
+        " .kc .k.on { background:var(--c-accent); color:var(--c-box-ink); text-shadow:none; }", 4, 24, "accent"),
     "plain-shadow": (
-        ".kc { background:none; padding:0; font-weight:700; font-size:64px; color:#fff; text-shadow:0 3px 18px rgba(0,0,0,.8), 0 0 3px rgba(0,0,0,.6); }",
+        ".kc { background:none; padding:0; font-weight:700; font-size:64px; color:var(--c-box-ink);"
+        " text-shadow:0 3px 18px color-mix(in srgb, var(--c-dark) 80%, transparent), 0 0 3px color-mix(in srgb, var(--c-dark) 60%, transparent); }",
         5, 30, "phrase"),
 }
 
@@ -188,7 +204,7 @@ ON_LIGHT = {
                     " .kc.onlight .k.on { color:var(--c-accent-light) !important; }",
     "one-word": ".kc.onlight, .kc.onlight .k { color:var(--c-ink) !important; -webkit-text-stroke:0; }",
     "active-pill": ".kc.onlight, .kc.onlight .k { color:var(--c-ink) !important; text-shadow:none; }"
-                   " .kc.onlight .k.on { color:#fff !important; }",
+                   " .kc.onlight .k.on { color:var(--c-light) !important; }",
     "plain-shadow": ".kc.onlight, .kc.onlight .k { color:var(--c-ink) !important; text-shadow:none; }",
 }
 
@@ -208,10 +224,8 @@ def karaoke(E):
     preset = caption_preset(E)
     if preset not in CAPTION_PRESETS:
         raise SystemExit(f"caption style {preset!r} isn't a preset. Choose one of: {', '.join(CAPTION_PRESETS)}")
-    _, pw, pc, how = CAPTION_PRESETS[preset]
-    if pw:                                                             # the preset's rhythm, unless edit.KARAOKE says otherwise
-        E.KARAOKE = {**dict(max_words=pw, max_chars=pc), **getattr(E, "KARAOKE", {})}
-    L = karaoke_lines(E)
+    how = CAPTION_PRESETS[preset][3]
+    L = karaoke_lines(E)                                               # in the preset's rhythm (caption_rhythm)
     huge = getattr(E, "KARAOKE", {}).get("huge", [])
     hide = getattr(E, "KARAOKE", {}).get("hide", [])           # windows an FX carries the words in (custom captions)
     for i, ln in enumerate(L):
@@ -235,7 +249,7 @@ def karaoke(E):
                 js.append(f"tl.set('#kc{i}_{j}', {{ className: 'k on' }}, q({w['start']:.3f})); tl.set('#kc{i}_{j}', {{ className: 'k' }}, q({nx:.3f}));")
         elif how == "pop":                                             # one word at a time, landing with a small pop
             js.append(f"tl.fromTo('#kc{i}', {{ scale: 0.82 }}, {{ scale: 1, duration: 0.11, ease: 'back.out(2.4)', immediateRender: false }}, q({t0:.3f}));")
-            js.append(f"gsap.set('#kc{i} .k', {{ color: '#fff' }});")
+            js.append(f"gsap.set('#kc{i} .k', {{ color: '{lit}' }});")
         elif how == "phrase" or getattr(E, "MODE", {}).get("captions") == "phrase":   # the whole line lands lit at once
             js.append(f"gsap.set('#kc{i} .k', {{ color: '{lit}' }});")
         else:                                                          # every word lights as it is spoken

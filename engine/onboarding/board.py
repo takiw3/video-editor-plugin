@@ -29,6 +29,13 @@ SWATCHES = [("accent", "Accent", "emphasis, the thing to look at"), ("accent_on_
             ("negative", "Negative", "losses, down, no"), ("positive", "Positive", "gains, up, yes"),
             ("light", "Light", "light ground, text on dark"), ("dark", "Dark", "dark ground"),
             ("ink", "Ink", "text on light"), ("caption_box", "Caption box", "behind captions on footage")]
+# caption samples, longest first: each frame shows the longest one a line holds in the creator's rhythm
+HIFI_CAPS = ["Captions look *like this*", "Captions *like this*", "Captions"]
+LOFI_CAPS = {"word-by-word": ["Each word lights up", "Words light up", "Words"],
+             "phrase": ["Lines land at once", "Lines land whole", "Lines"],
+             "single": ["One"]}
+SHOWCASE_CAPS = ["I never edit anymore", "I never edit", "never"]     # always says the word behind the head
+HIFI_CUT = {"phrases": "in phrases", "words": "a word at a time", "lines": "a line at a time"}
 
 
 def arg(name, default=None):
@@ -84,7 +91,7 @@ def snap(d, t, out):
 def split_word(S, pack, word, size, top, frame):
     """the emphatic word with each letter light or ink against the picture under it, the way the showcase effects
     split type over footage (no outline). Letter widths from the pack's own display font file"""
-    from PIL import Image, ImageFont
+    from PIL import Image, ImageFont, ImageStat
     F = S["fonts"]["display"]
     name = f"{F['family'].replace(' ', '')}-{'italic' if F.get('italic') else 'normal'}-{F.get('weight', 400)}.ttf"
     files = sorted(glob.glob(os.path.join(pack, "fonts", F["family"].replace(" ", "") + "-*.ttf")))
@@ -98,10 +105,31 @@ def split_word(S, pack, word, size, top, frame):
     out = []
     for ch, w in zip(word, widths):
         box = (int(max(0, x)), int(top + size * 0.15), int(min(1080, x + w)), int(top + size * 0.85))
-        light = sum(grey.crop(box).getdata()) / max(1, (box[2] - box[0]) * (box[3] - box[1])) / 255 > 0.55
+        light = box[2] > box[0] and ImageStat.Stat(grey.crop(box)).mean[0] / 255 > 0.55
         out.append(f'<span style="color:var({"--c-ink" if light else "--c-light"})">{html.escape(ch)}</span>')
         x += w
     return "".join(out)
+
+
+def fit(samples, rhythm):
+    """the longest sample a caption line holds: at most max words and max characters (build.caption_rhythm)"""
+    mw, mc = rhythm
+    return next((s for s in samples if len(s.split()) <= mw and len(s.replace("*", "")) <= mc), samples[-1])
+
+
+def kc_line(text, how, mode, lit):
+    """a word-by-word caption caught halfway through its line, lit the way build.karaoke lights this preset"""
+    words = text.split()
+    said = max(1, (len(words) + 1) // 2)
+    out = []
+    for j, w in enumerate(words):
+        if how == "accent":                                              # the word being said takes the accent
+            out.append(f'<span class="k{" on" if j == said - 1 else ""}">{html.escape(w)}</span>')
+        elif how in ("pop", "phrase") or mode.get("captions") == "phrase" or j < said:
+            out.append(f'<span class="k" style="color:{lit}">{html.escape(w)}</span>')
+        else:                                                            # not said yet: the preset's dim colour
+            out.append(f'<span class="k">{html.escape(w)}</span>')
+    return " ".join(out)
 
 
 def card_title(cid):
@@ -140,7 +168,12 @@ def main():
     os.makedirs(work, exist_ok=True)
     C = S["colors"]
     E = types.SimpleNamespace(S=S)
-    extra = B.pack_css(E)
+    extra = B.pack_css(E) + "\n" + B.caption_css(E)                   # the caption preset too, the way the build adds it
+    preset = B.caption_preset(E)
+    how = B.CAPTION_PRESETS[preset][3]
+    M = S.get("modes", {})
+    R = {m: B.caption_rhythm(types.SimpleNamespace(S=S, MODE=M.get(m, {}))) for m in ("hifi", "lofi", "showcase")}
+    lit = html.escape(C["caption_ink"])
 
     clip = arg("--clip")
     if clip:
@@ -154,7 +187,6 @@ def main():
               '<div class="full" style="background:var(--c-dark)"></div>')
     name = S["creator"].get("name") or "Your source"
 
-    M = S.get("modes", {})
     hook_kind = M.get("hifi", {}).get("hook", "two-line")
     hook = {"two-line": f'<div class="eb">{html.escape(name)} · 2026</div><div class="h1">This is your hook</div>'
                         f'<div class="h2">in your style</div>',
@@ -163,16 +195,13 @@ def main():
     print("rendering the hi-fi frame ...", flush=True)
     phone(os.path.join(work, "hifi"), pack, f'''{ground}
 <div id="hook">{hook}</div>
-<div class="capw"><div class="cap onfoot" style="opacity:1">Captions look <span class="em">like this</span></div></div>''',
+<div class="capw"><div class="cap onfoot" style="opacity:1">{B.fmt(html.escape(fit(HIFI_CAPS, R["hifi"])))}</div></div>''',
           ["reel.css"], extra)
     snap(os.path.join(work, "hifi"), 0.5, os.path.join(board, "img", "hifi.jpg"))
 
     print("rendering the lo-fi frame ...", flush=True)
-    lit = html.escape(C["caption_ink"])
     rhythm = M.get("lofi", {}).get("captions", "word-by-word")
-    line = {"word-by-word": f'<span style="color:{lit}">each word</span> lights up',
-            "phrase": f'<span style="color:{lit}">the line lands at once</span>',
-            "single": f'<span style="color:{lit}">one</span>'}.get(rhythm, "")
+    line = kc_line(fit(LOFI_CAPS.get(rhythm, LOFI_CAPS["word-by-word"]), R["lofi"]), how, M.get("lofi", {}), lit)
     box = ('<div class="nb" style="opacity:1"><span class="ln">Your hook, in a text box</span></div>'
            if M.get("lofi", {}).get("text_boxes", True) else "")
     phone(os.path.join(work, "lofi"), pack, f'''{ground}
@@ -196,7 +225,7 @@ def main():
     phone(sd, pack, f'''{ground}
 <div class="bh" style="top:{top}px;font-size:250px;">{word}</div>
 {cut}
-<div class="kw"><div class="kc" style="opacity:1"><span style="color:{lit}">I never open an editing app</span></div></div>''',
+<div class="kw"><div class="kc" style="opacity:1">{kc_line(fit(SHOWCASE_CAPS, R["showcase"]), how, M.get("showcase", {}), lit)}</div></div>''',
           ["reel.css", "reel-lofi.css"], extra)
     snap(os.path.join(work, "showcase"), 0.5, os.path.join(board, "img", "showcase.jpg"))
 
@@ -288,8 +317,8 @@ footer {{ padding-top: 32px; font-size: 16px; line-height: 1.55; max-width: 62ch
     <h2>Your three modes</h2>
     <p class="note">How each mode looks for you, {footage}.</p>
     <div class="grid">
-      <figure><img src="img/hifi.jpg" alt="Hi-fi hook and caption" /><figcaption><b>Hi-fi</b> produced: {html.escape(hook_kind)} hook, captions in phrases, cards, camera {html.escape(str(M.get("hifi", {}).get("camera", "settle")))}</figcaption></figure>
-      <figure><img src="img/lofi.jpg" alt="Lo-fi text box and caption" /><figcaption><b>Lo-fi</b> selfie: captions {html.escape(rhythm)}{", text boxes" if M.get("lofi", {}).get("text_boxes", True) else ""}</figcaption></figure>
+      <figure><img src="img/hifi.jpg" alt="Hi-fi hook and caption" /><figcaption><b>Hi-fi</b> produced: {html.escape(hook_kind)} hook, captions {HIFI_CUT.get(M.get("hifi", {}).get("captions"), "in phrases")}, cards, camera {html.escape(str(M.get("hifi", {}).get("camera", "settle")))}</figcaption></figure>
+      <figure><img src="img/lofi.jpg" alt="Lo-fi text box and caption" /><figcaption><b>Lo-fi</b> selfie: {html.escape(preset)} captions{"" if B.CAPTION_PRESETS[preset][1] else ", " + html.escape(rhythm)}{", text boxes" if M.get("lofi", {}).get("text_boxes", True) else ""}</figcaption></figure>
       <figure><img src="img/showcase.jpg" alt="Showcase emphatic word" /><figcaption><b>Showcase</b> show-off: a big word lands with a {html.escape(land)}; transitions {html.escape(", ".join(M.get("showcase", {}).get("transitions", [])))}</figcaption></figure>
     </div>
   </section>

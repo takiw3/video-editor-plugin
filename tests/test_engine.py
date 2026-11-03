@@ -246,6 +246,41 @@ class StarterPack(unittest.TestCase):
             self.assertFalse(os.path.exists(os.path.join(d, "fx", "snap-zoom", "preview.jpg")))
 
 
+class Captions(unittest.TestCase):
+    def E(self, preset, mode=None, **kw):
+        import types
+        S = dict(captions=dict(preset=preset, hifi=dict(box=False), lofi=dict(box=False)))
+        return types.SimpleNamespace(S=S, MODE=mode or {}, **kw)
+
+    def test_colours_and_weight_come_from_the_pack(self):
+        import build
+        pure = re.compile(r"#f{3}\b|#f{6}\b|#0{3}\b|#0{6}\b|rgba?\(\s*(0\s*,\s*){2}0|rgba?\(\s*(255\s*,\s*){2}255", re.I)
+        css = [c for c, *_ in build.CAPTION_PRESETS.values()] + list(build.ON_LIGHT.values()) + [build.pack_css(self.E("one-word"))]
+        self.assertEqual([c for c in css if pure.search(c)], [])
+        self.assertEqual([c for c in css if "font-weight:900" in c], [])
+
+    def test_rhythm(self):
+        import build
+        self.assertEqual(build.caption_rhythm(self.E("one-word")), (1, 16))
+        self.assertEqual(build.caption_rhythm(self.E("bold-outline", dict(captions="single"))), (3, 18))
+        self.assertEqual(build.caption_rhythm(self.E("karaoke-box")), (4, 24))
+        self.assertEqual(build.caption_rhythm(self.E("karaoke-box", dict(captions="single", max_chars=20))), (1, 20))
+        self.assertEqual(build.caption_rhythm(self.E("one-word", KARAOKE=dict(max_words=2))), (2, 16))
+
+    def test_board_samples_fit_every_preset(self):
+        import build
+        sys.path.insert(0, os.path.join(ENG, "onboarding"))
+        import board
+        for preset in build.CAPTION_PRESETS:
+            for mode in ({}, dict(captions="single"), dict(captions="phrase")):
+                mw, mc = build.caption_rhythm(self.E(preset, mode))
+                for samples in [board.HIFI_CAPS, board.SHOWCASE_CAPS] + list(board.LOFI_CAPS.values()):
+                    s = board.fit(samples, (mw, mc))
+                    self.assertLessEqual(len(s.split()), mw, (preset, mode, s))
+                    self.assertLessEqual(len(s.replace("*", "")), mc, (preset, mode, s))
+        self.assertIn("never", board.fit(board.SHOWCASE_CAPS, (1, 16)))
+
+
 class Plugin(unittest.TestCase):
     def test_manifest(self):
         d = json.load(open(os.path.join(ROOT, ".claude-plugin", "plugin.json")))
