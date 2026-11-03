@@ -21,7 +21,7 @@ About 10 minutes, most of it a download you don't have to watch.
 ```
 
 ```
-/plugin install video-editor@takigpt
+https://github.com/takiw3/video-editor-plugin
 ```
 
 **Claude Cowork.** Download `video-editor-plugin.zip` from the [latest release](https://github.com/takiw3/video-editor-plugin/releases/latest), then add it from the plugin menu.
