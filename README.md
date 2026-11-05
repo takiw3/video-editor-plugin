@@ -21,10 +21,16 @@ About 10 minutes, most of it a download you don't have to watch.
 ```
 
 ```
+/plugin install video-editor@takigpt
+```
+
+**Claude desktop app or Cowork.** Open **Customize**, then **Plugins**, and select **Add marketplace**. Paste this link and select **Sync**:
+
+```
 https://github.com/takiw3/video-editor-plugin
 ```
 
-**Claude Cowork.** Download `video-editor-plugin.zip` from the [latest release](https://github.com/takiw3/video-editor-plugin/releases/latest), then add it from the plugin menu.
+Then find **video-editor** under **Discover** and select **Install**. You can also download `video-editor-plugin.zip` from the [latest release](https://github.com/takiw3/video-editor-plugin/releases/latest) and upload it on the same Plugins page.
 
 ### 2. Set it up
 
